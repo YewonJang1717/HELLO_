@@ -13,15 +13,14 @@ const DURATION = 90;
 
 // ── 마침표 색상 ───────────────────────────────────────
 const C_DARK = [45,  45,  45];
-const C_BLUE = [20,  20, 220];
-const C_PURP = [100, 30, 140];
-const C_NAVY = [30,  30, 180];
+const C_PURP = [75, 0, 130];
+const C_NAVY = [0,  0, 205];
 
 // ── 마침표 막대 정의 ──────────────────────────────────
 const BARS = [
   { yRatio:0.46,  hRatio:0.008, xRatio:0.44, wRatio:0.55, color:C_DARK, speed:0.9,  delay:2  },
   { yRatio:0.76,  hRatio:0.006, xRatio:0.52, wRatio:0.47, color:C_DARK, speed:1.1,  delay:5  },
-  { yRatio:0.53,  hRatio:0.038, xRatio:0.0,  wRatio:0.52, color:C_BLUE, speed:0.85, delay:8  },
+  { yRatio:0.53,  hRatio:0.038, xRatio:0.0,  wRatio:0.52, color:C_NAVY, speed:0.85, delay:8  },
   { yRatio:0.595, hRatio:0.05,  xRatio:0.05, wRatio:0.31, color:C_PURP, speed:0.95, delay:3  },
   { yRatio:0.595, hRatio:0.04,  xRatio:0.53, wRatio:0.25, color:C_PURP, speed:1.05, delay:6  },
   { yRatio:0.665, hRatio:0.065, xRatio:0.3,  wRatio:0.41, color:C_NAVY, speed:0.8,  delay:10 },
@@ -214,11 +213,11 @@ function initQuestionAnim() {
       vy: sin(angle) * lineSpeed,
       len: width * 0.05,
       lineAngle: angle,
-      color: [30, 180, 80],
+      color: [154, 205, 50],
       alpha: 255
     });
 
-    // 주황 작은 원
+    // 원
     let smallSpeed = width * 0.013;
     qParticles.push({
       type: 'circle',
@@ -226,12 +225,12 @@ function initQuestionAnim() {
       vx: cos(angle) * smallSpeed,
       vy: sin(angle) * smallSpeed,
       r: width * 0.010,
-      color: [230, 130, 0],
+      color: [220, 20, 60],
       alpha: 255
     });
 
     // 노란 큰 원 (3방향마다)
-    if (i % 3 === 0) {
+    if (i % 2 === 0) {
       let bigSpeed = width * 0.008;
       qParticles.push({
         type: 'circle',
@@ -239,7 +238,7 @@ function initQuestionAnim() {
         vx: cos(angle) * bigSpeed,
         vy: sin(angle) * bigSpeed,
         r: width * 0.038,
-        color: [255, 220, 0],
+        color: [255, 215, 0],
         alpha: 255
       });
     }
@@ -338,9 +337,9 @@ function initExclamationAnim() {
 
  // 고리 3개 - 각기 다른 랜덤 위치
   let ringColors = [
-    [220, 30, 30],
+    [220, 20, 60],
     [45, 45, 45],
-    [220, 30, 30],
+    [220, 20, 60],
   ];
   for (let i = 0; i < 3; i++) {
     exParticles.push({
@@ -358,14 +357,14 @@ function initExclamationAnim() {
   
   // 삼각형 8개 - 랜덤 방향, 크고 박력있게
   let triColors = [
-    [220, 30,  30],
-    [220, 30,  30],
-    [230, 130,  0],
-    [230, 130,  0],
-    [100, 60,   0],
-    [100, 60,   0],
-    [220, 30,  30],
-    [230, 130,  0],
+    [220, 20,  60],
+    [220, 20,  60],
+    [255, 215, 0],
+    [255, 215, 0],
+    [220, 20,  60],
+    [255, 215, 0],
+    [220, 20,  60],
+    [255, 215, 0],
   ];
   for (let i = 0; i < 8; i++) {
     // 8등분 각도 기준으로 랜덤성 추가 (같은 방향 방지)
@@ -516,11 +515,11 @@ const COMMA_DURATION = 170;
 const RING_X = [0.25, 0.39, 0.59, 0.70, 0.92];
 // 선 색상 (시안, 보라 번갈아)
 const BAR_COLORS = [
-  [0, 230, 230],    // 시안
-  [130, 100, 220],  // 보라
-  [0, 230, 230],
-  [130, 100, 220],
-  [0, 230, 230],
+  [173, 216, 230],    // 시안
+  [147, 112, 219],  // 보라
+  [173, 216, 230],
+  [147, 112, 219],
+  [173, 216, 230],
 ];
 const RING_Y    = 0.08;  // 고리 y 위치 비율
 const RING_R    = 0.04;  // 고리 반지름 비율
@@ -621,11 +620,11 @@ const SLASH_DURATION = 130;
 
 // 선 5개 정의 (방향: 1=우상향, -1=우하향)
 const SLASH_LINES = [
-  { color: [180, 0, 255], dir:  1 }, // 보라 ↗
-  { color: [255, 210, 0], dir: -1 }, // 노랑 ↘
-  { color: [180, 0, 255], dir:  1 }, // 보라 ↗
-  { color: [255, 210, 0], dir: -1 }, // 노랑 ↘
-  { color: [180, 0, 255], dir:  1 }, // 보라 ↗
+  { color: [147, 112, 219], dir:  1 }, // 보라 ↗
+  { color: [255, 215, 0], dir: -1 }, // 노랑 ↘
+  { color: [147, 112, 219], dir:  1 }, // 보라 ↗
+  { color: [255, 215, 0], dir: -1 }, // 노랑 ↘
+  { color: [147, 112, 219], dir:  1 }, // 보라 ↗
 ];
 
 let slashLetters = []; // 흩어지는 HELLO 글자 상태
@@ -648,7 +647,7 @@ function initSlashAnim() {
   }
   pop();
 
-  // 글자 목표 위치 (선과 겹치지 않게)
+  // 글자 목표 위치 
   let targets = [
     { x: width * 0.08, y: height * 0.35 }, // H
     { x: width * 0.28, y: height * 0.58 }, // E
@@ -786,11 +785,11 @@ function initColonAnim() {
 
   // 직선 6개 - 두께와 길이 각각 다르게
   let lines = [
-    { angle: -2.4,  color: [150, 130, 220], speed: width * 0.022, len: width * 0.18, thick: width * 0.018 }, // 연보라 (좌상)
-    { angle: -0.4,  color: [0,   220, 220], speed: width * 0.025, len: width * 0.10, thick: width * 0.012 }, // 시안 (우상)
-    { angle:  0.6,  color: [80,   0, 120],  speed: width * 0.020, len: width * 0.22, thick: width * 0.022 }, // 진보라 (우하 큰 것)
-    { angle:  2.0,  color: [80,  0,  120],  speed: width * 0.018, len: width * 0.16, thick: width * 0.018 }, // 진보라 (좌하)
-    { angle:  2.6,  color: [30,  180, 80],  speed: width * 0.023, len: width * 0.08, thick: width * 0.030 }, // 초록 (짧고 두꺼운)
+    { angle: -2.4,  color: [147, 112, 219], speed: width * 0.022, len: width * 0.18, thick: width * 0.018 }, // 연보라 (좌상)
+    { angle: -0.4,  color: [173, 216, 230], speed: width * 0.025, len: width * 0.10, thick: width * 0.012 }, // 시안 (우상)
+    { angle:  0.6,  color: [75, 0, 130],  speed: width * 0.020, len: width * 0.22, thick: width * 0.022 }, // 진보라 (우하 큰 것)
+    { angle:  2.0,  color: [75, 0, 130],  speed: width * 0.018, len: width * 0.16, thick: width * 0.018 }, // 진보라 (좌하)
+    { angle:  2.6,  color: [154, 205, 50],  speed: width * 0.023, len: width * 0.08, thick: width * 0.030 }, // 초록 (짧고 두꺼운)
     { angle: -1.0,  color: [45,   45, 45],  speed: width * 0.021, len: width * 0.20, thick: width * 0.030 }, // 검정 (두껍고 긴)
   ];
   for (let l of lines) {
@@ -809,10 +808,10 @@ function initColonAnim() {
 
   // 호 4개 - 크기와 두께 각각 다르게
   let arcs = [
-    { angle: -PI * 0.9, span: PI * 0.55, color: [0,   220, 220], speed: width * 0.020, r: width * 0.18, thick: width * 0.012 }, // 시안 큰 호
-    { angle: PI * 0.10, span: PI * 0.45, color: [230, 130,   0], speed: width * 0.018, r: width * 0.12, thick: width * 0.035 }, // 주황 두꺼운 호
-    { angle:  PI * 0.6, span: PI * 0.40, color: [150, 180, 255], speed: width * 0.022, r: width * 0.14, thick: width * 0.018 }, // 하늘 호
-    { angle: -PI * 0.4, span: PI * 0.45, color: [220,  30,  30], speed: width * 0.019, r: width * 0.16, thick: width * 0.012 }, // 빨강 호
+    { angle: -PI * 0.9, span: PI * 0.55, color: [173, 216, 230], speed: width * 0.020, r: width * 0.18, thick: width * 0.012 }, // 시안 큰 호
+    { angle: PI * 0.10, span: PI * 0.45, color: [255, 215, 0], speed: width * 0.018, r: width * 0.12, thick: width * 0.035 }, // 주황 두꺼운 호
+    { angle:  PI * 0.6, span: PI * 0.40, color: [173, 216, 230], speed: width * 0.022, r: width * 0.14, thick: width * 0.018 }, // 하늘 호
+    { angle: -PI * 0.4, span: PI * 0.45, color: [220, 20, 60], speed: width * 0.019, r: width * 0.16, thick: width * 0.012 }, // 빨강 호
   ];
   for (let a of arcs) {
     colonParticles.push({
@@ -867,7 +866,7 @@ function drawColonAnim() {
 
     if (t < splitEnd) {
       noStroke();
-      fill(255, 210, 0);
+      fill(255, 215, 0);
       circle(cx, cy, r * 2);
  } else {
      let splitProgress = constrain((t - circleEnd) / (COLON_DURATION * 0.3), 0, 1); 
@@ -877,7 +876,7 @@ function drawColonAnim() {
       let splitAngle = -PI / 6; // 갈라지는 선 각도
 
       noStroke();
-      fill(255, 210, 0);
+      fill(255, 215, 0);
 
       // 왼쪽 조각 → 왼쪽으로 날아감
       push();
@@ -961,9 +960,9 @@ const QUOTE_DURATION = 130;
 
 // 직선 3개 정의
 const QUOTE_BARS = [
-  { color: [30,  100, 220], hRatio: 0.022, yOffset: 0.08  }, // 파랑 (두꺼움)
+  { color: [0, 0, 205], hRatio: 0.022, yOffset: 0.08  }, // 파랑 (두꺼움)
   { color: [45,   45,  45], hRatio: 0.006, yOffset: 0.135 }, // 검정 (얇음)
-  { color: [220,  30,  30], hRatio: 0.030, yOffset: 0.185 }, // 빨강 (두꺼움)
+  { color: [220, 20, 60], hRatio: 0.030, yOffset: 0.185 }, // 빨강 (두꺼움)
 ];
 
 
@@ -1021,9 +1020,9 @@ function drawQuoteAnim() {
 // ── 직선 3개: H보다 왼쪽에서 시작, O 끝에서 사라짐 ──
   if (t >= moveEnd) {
     let bars = [
-      { color: [30, 100, 220], h: height * 0.025, y: helloBotY + height * 0.005  },
+      { color: [0, 0, 205], h: height * 0.025, y: helloBotY + height * 0.005  },
       { color: [45,  45,  45], h: height * 0.006, y: helloBotY + height * 0.042  },
-      { color: [220, 30,  30], h: height * 0.032, y: helloBotY + height * 0.060  },
+      { color: [220, 20, 60], h: height * 0.032, y: helloBotY + height * 0.060  },
     ];
 
     for (let i = 0; i < 3; i++) {
@@ -1131,8 +1130,8 @@ const SQ_DURATION = 130;
 // 1번 이미지 기준: 작→중→중→대 순서로 대각선 방향 배치
 const SQ_BUBBLES = [
   { dx: 0.03, dy:  0.02, r: 0.012, delay: 0  }, // 제일 작은
-  { dx: 0.02, dy:  0.07, r: 0.020, delay: 8  }, // 작은
-  { dx: 0.09, dy:  0.04, r: 0.032, delay: 16 }, // 중간
+  { dx: 0.02, dy:  0.09, r: 0.020, delay: 8  }, // 작은
+  { dx: 0.09, dy:  0.06, r: 0.032, delay: 16 }, // 중간
   { dx: 0.10, dy: -0.07, r: 0.045, delay: 24 }, // 큰
 ];
 
@@ -1237,7 +1236,7 @@ function drawSingleQuoteAnim() {
   }
 
   if (t >= SQ_DURATION) resetToIdle();
-
+}
 //  붙임표 애니메이션
 // ─────────────────────────────────────────────────────
 const HYPHEN_DURATION = 120;
@@ -1296,7 +1295,7 @@ function drawHyphenAnim() {
       drawingContext.rect(bx, boxTop, bw, boxH);
       drawingContext.clip();
       noStroke();
-      fill(220, 30, 0);
+      fill(220, 20, 60);
       rect(bx, currentY, bw, boxH);
       drawingContext.restore();
       pop();
@@ -1325,7 +1324,6 @@ function drawHyphenAnim() {
   }
 
   if (t >= HYPHEN_DURATION) resetToIdle();
-}
 }
 //  홀화살괄호 애니메이션
 // ─────────────────────────────────────────────────────
@@ -1502,7 +1500,7 @@ function drawParenAnim() {
         by = baseY;
 
         noStroke();
-        fill(150, 200, 255);
+        fill(173, 216, 230);
         circle(bx, by, r * 2 * ease);
 
      } else {
@@ -1532,7 +1530,7 @@ function drawParenAnim() {
         by = lerp(baseY, target.ty, ease);
 
         noStroke();
-        fill(150, 200, 255);
+        fill(173, 216, 230);
         circle(bx, by, r * 2);
       }
     }
@@ -1647,29 +1645,29 @@ function drawBraceAnim() {
 
       if (i === 0) {
         // H: 노란 사각형
-        fill(255, 210, 0);
+        fill(255, 215, 0);
         rect(shapeStartX, cy - shapeH * 0.5, w, shapeH);
 
       } else if (i === 1) {
         // E: 보라색 양끝 둥근 사각형
-        fill(180, 0, 220);
+        fill(147, 112, 219);
         rect(shapeStartX, cy - shapeH * 0.3, w, shapeH * 0.6, shapeH * 0.3);
 
       } else if (i === 2) {
         // L(위): 검정 직선 2개
-        fill(20, 20, 20);
+        fill(45, 45, 45);
         rect(shapeStartX, cy - shapeH * 0.3, w, shapeH * 0.08);
         rect(shapeStartX, cy + shapeH * 0.1, w, shapeH * 0.08);
 
       } else if (i === 3) {
         // L(아래): 파란 직선 2개
-        fill(30, 120, 220);
+        fill(0, 0, 205);
         rect(shapeStartX, cy - shapeH * 0.3, w, shapeH * 0.08);
         rect(shapeStartX, cy + shapeH * 0.1, w, shapeH * 0.08);
 
       } else if (i === 4) {
         // O: 진보라 짧은 사각형 3개
-        fill(80, 0, 100);
+        fill(45, 45, 45);
         let boxW = w * 0.22;
         let gap  = w * 0.12;
         for (let j = 0; j < 3; j++) {
@@ -1686,7 +1684,7 @@ function drawBraceAnim() {
     let coverH  = ease * height;
 
     noStroke();
-    fill(150, 150, 255);
+    fill(75, 0, 130);
     rect(0, 0, width, coverH);
   }
 
@@ -1765,7 +1763,7 @@ function drawBracketAnim() {
     let rightX = lerp(width + ellipseW, cx, ease);
 
     noStroke();
-    fill(30, 120, 220); // 파란색
+    fill(0, 0, 205); // 파란색
 
     // 왼쪽 반타원 (오른쪽 절반만 보임 → 왼쪽이 평평)
     push();
@@ -1850,7 +1848,7 @@ function drawUnderscoreAnim() {
       translate(lx + cos(angle) * dist, ly + sin(angle) * dist);
       rotate(angle + HALF_PI);
       noStroke();
-      fill(220, 40, 0, alpha);
+      fill(220, 20, 60, alpha);
       // 이등변사각형 (위쪽이 좁고 아래쪽이 넓은)
       beginShape();
       vertex(-shapeW1 / 2, -shapeH / 2);
@@ -1873,7 +1871,7 @@ function drawUnderscoreAnim() {
       translate(rx + cos(angle) * dist, ry + sin(angle) * dist);
       rotate(angle + HALF_PI);
       noStroke();
-      fill(220, 40, 0, alpha);
+      fill(220, 20, 60, alpha);
       beginShape();
       vertex(-shapeW1 / 2, -shapeH / 2);
       vertex( shapeW1 / 2, -shapeH / 2);
@@ -2044,7 +2042,7 @@ function drawTildeAnim() {
     let cy     = c.baseY - abs(bounce) * height * 0.08;
 
     noStroke();
-    fill(220, 40, 0, alpha);
+    fill(220, 20, 60, alpha);
     circle(c.x, cy, circleR * 2);
   }
 
@@ -2071,7 +2069,7 @@ function drawTildeAnim() {
     let waveAmp  = height * 0.018; // 진폭 작게
     let waveFreq = width  * 0.045; // 주기 길게
     
-    stroke(220, 150, 0, alpha);
+    stroke(255, 215, 0, alpha);
     strokeWeight(width * 0.006);
     noFill();
     beginShape();
