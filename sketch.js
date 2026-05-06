@@ -55,7 +55,28 @@ function draw() {
       drawCommaAnim();
     } else if (inputChar === '/') {
       drawSlashAnim();
+    } else if (inputChar === ':') {
+      drawColonAnim();
+    } else if (inputChar === '"') {
+      drawQuoteAnim();
+    } else if (inputChar === "'") {
+      drawSingleQuoteAnim();
+    } else if (inputChar === '-') {
+      drawHyphenAnim();
+    } else if (inputChar === '<' || inputChar === '>') {
+      drawAngleAnim();
+    } else if (inputChar === '(' || inputChar === ')') {
+      drawParenAnim();
+    } else if (inputChar === '{' || inputChar === '}') {
+      drawBraceAnim();
+    } else if (inputChar === '[' || inputChar === ']') {
+      drawBracketAnim();
+    } else if (inputChar === '_') {
+      drawUnderscoreAnim();
+    } else if (inputChar === '~') {
+      drawTildeAnim();
     }
+
   }
 }
 
@@ -240,7 +261,7 @@ function initQuestionAnim() {
     let lx = helloStartX + offsetX;
     let ly = helloStartY;
     let angle = atan2(ly - cy, lx - cx);
-    let speed = width * 0.008;
+    let speed = width * 0.016;
     qParticles.push({
       type: 'letter',
       char: letters[i],
@@ -751,6 +772,1318 @@ function drawSlashAnim() {
 
   if (t >= SLASH_DURATION) resetToIdle();
 }
+// ─────────────────────────────────────────────────────
+//  쌍점 애니메이션
+// ─────────────────────────────────────────────────────
+const COLON_DURATION = 120;
+
+let colonParticles = [];
+
+function initColonAnim() {
+  colonParticles = [];
+  let cx = width * 0.5;
+  let cy = height * 0.5;
+
+  // 직선 6개 - 두께와 길이 각각 다르게
+  let lines = [
+    { angle: -2.4,  color: [150, 130, 220], speed: width * 0.022, len: width * 0.18, thick: width * 0.018 }, // 연보라 (좌상)
+    { angle: -0.4,  color: [0,   220, 220], speed: width * 0.025, len: width * 0.10, thick: width * 0.012 }, // 시안 (우상)
+    { angle:  0.6,  color: [80,   0, 120],  speed: width * 0.020, len: width * 0.22, thick: width * 0.022 }, // 진보라 (우하 큰 것)
+    { angle:  2.0,  color: [80,  0,  120],  speed: width * 0.018, len: width * 0.16, thick: width * 0.018 }, // 진보라 (좌하)
+    { angle:  2.6,  color: [30,  180, 80],  speed: width * 0.023, len: width * 0.08, thick: width * 0.030 }, // 초록 (짧고 두꺼운)
+    { angle: -1.0,  color: [45,   45, 45],  speed: width * 0.021, len: width * 0.20, thick: width * 0.030 }, // 검정 (두껍고 긴)
+  ];
+  for (let l of lines) {
+    colonParticles.push({
+      type: 'line',
+      x: cx, y: cy,
+      vx: cos(l.angle) * l.speed,
+      vy: sin(l.angle) * l.speed,
+      len: l.len,
+      thick: l.thick,
+      angle: l.angle,
+      color: l.color,
+      alpha: 255
+    });
+  }
+
+  // 호 4개 - 크기와 두께 각각 다르게
+  let arcs = [
+    { angle: -PI * 0.9, span: PI * 0.55, color: [0,   220, 220], speed: width * 0.020, r: width * 0.18, thick: width * 0.012 }, // 시안 큰 호
+    { angle: PI * 0.10, span: PI * 0.45, color: [230, 130,   0], speed: width * 0.018, r: width * 0.12, thick: width * 0.035 }, // 주황 두꺼운 호
+    { angle:  PI * 0.6, span: PI * 0.40, color: [150, 180, 255], speed: width * 0.022, r: width * 0.14, thick: width * 0.018 }, // 하늘 호
+    { angle: -PI * 0.4, span: PI * 0.45, color: [220,  30,  30], speed: width * 0.019, r: width * 0.16, thick: width * 0.012 }, // 빨강 호
+  ];
+  for (let a of arcs) {
+    colonParticles.push({
+      type: 'arc',
+      x: cx, y: cy,
+      vx: cos(a.angle + a.span * 0.5) * a.speed,
+      vy: sin(a.angle + a.span * 0.5) * a.speed,
+      r: a.r,
+      thick: a.thick,
+      startAngle: a.angle,
+      endAngle: a.angle + a.span,
+      color: a.color,
+      alpha: 255
+    });
+  }
+}
+
+function drawColonAnim() {
+  if (t === 0) initColonAnim();
+  if (t < COLON_DURATION) t++;
+
+  let moveEnd   = 25;
+  let pauseEnd  = 31;
+  let circleEnd = 48;
+  let splitEnd  = 62;
+  let fadeStart = 88;
+
+  let cx = width * 0.5;
+  let cy = height * 0.5;
+
+  push();
+  textSize(width * 0.13);
+  textFont('Noto Sans KR, sans-serif');
+  let letters      = ['H', 'E', 'L', 'L', 'O'];
+  let totalW       = textWidth('HELLO');
+  let centerStartX = width * 0.5 - totalW * 0.5;
+  let helloStartX  = width * 0.07;
+  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let offsets      = [];
+  for (let i = 0; i < letters.length; i++) {
+    let ox = 0;
+    for (let j = 0; j < i; j++) ox += textWidth(letters[j]);
+    offsets.push(ox);
+  }
+  pop();
+
+  // ── 노란 원 (HELLO보다 먼저 그려서 아래 레이어) ──────
+  if (t >= pauseEnd) {
+    let circleProgress = constrain((t - pauseEnd) / (circleEnd - pauseEnd), 0, 1);
+    let ease = 1 - pow(1 - circleProgress, 3);
+    let r    = ease * width * 0.15;
+
+    if (t < splitEnd) {
+      noStroke();
+      fill(255, 210, 0);
+      circle(cx, cy, r * 2);
+ } else {
+     let splitProgress = constrain((t - circleEnd) / (COLON_DURATION * 0.3), 0, 1); 
+      let splitEase     = splitProgress * splitProgress;
+      let offset        = splitEase * width * 1.2;
+
+      let splitAngle = -PI / 6; // 갈라지는 선 각도
+
+      noStroke();
+      fill(255, 210, 0);
+
+      // 왼쪽 조각 → 왼쪽으로 날아감
+      push();
+      translate(cx - offset, cy); // 순수하게 왼쪽으로만 이동
+      arc(0, 0, r * 2, r * 2,
+          splitAngle + HALF_PI,
+          splitAngle + HALF_PI + PI);
+      pop();
+
+      // 오른쪽 조각 → 오른쪽으로 날아감
+      push();
+      translate(cx + offset, cy); // 순수하게 오른쪽으로만 이동
+      arc(0, 0, r * 2, r * 2,
+          splitAngle - HALF_PI,
+          splitAngle + HALF_PI);
+      pop();
+    }
+  }
+
+  // ── HELLO 그리기 (원보다 위 레이어) ─────────────────
+  for (let i = 0; i < letters.length; i++) {
+    let x, y;
+    if (t <= moveEnd) {
+      let prog = constrain(t / moveEnd, 0, 1);
+      let ease = prog * prog * (3 - 2 * prog);
+      x = lerp(helloStartX + offsets[i], centerStartX + offsets[i], ease);
+      y = lerp(helloStartY, height * 0.5 - width * 0.065, ease);
+    } else {
+      x = centerStartX + offsets[i];
+      y = height * 0.5 - width * 0.065;
+    }
+    noStroke();
+    fill(45);
+    textAlign(LEFT, TOP);
+    textStyle(BOLD);
+    textSize(width * 0.13);
+    textFont('Noto Sans KR, sans-serif');
+    text(letters[i], x, y);
+  }
+
+  // ── 선들 퍼져나감 (splitEnd 이후) ───────────────────
+  if (t >= splitEnd) {
+    let alpha = t > fadeStart ? map(t, fadeStart, COLON_DURATION, 255, 0) : 255;
+
+    for (let p of colonParticles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.alpha = alpha;
+
+      if (p.type === 'line') {
+        stroke(p.color[0], p.color[1], p.color[2], p.alpha);
+        strokeWeight(p.thick);
+        strokeCap(ROUND);
+        noFill();
+        push();
+        translate(p.x, p.y);
+        rotate(p.angle);
+        line(-p.len / 2, 0, p.len / 2, 0);
+        pop();
+      }
+
+      if (p.type === 'arc') {
+        stroke(p.color[0], p.color[1], p.color[2], p.alpha);
+        strokeWeight(p.thick);
+        strokeCap(ROUND);
+        noFill();
+        arc(p.x, p.y, p.r * 2, p.r * 2, p.startAngle, p.endAngle);
+      }
+    }
+  }
+
+  if (t >= COLON_DURATION) {
+    colonParticles = [];
+    resetToIdle();
+  }
+}
+// ─────────────────────────────────────────────────────
+//  큰따옴표 애니메이션
+// ─────────────────────────────────────────────────────
+const QUOTE_DURATION = 130;
+
+// 직선 3개 정의
+const QUOTE_BARS = [
+  { color: [30,  100, 220], hRatio: 0.022, yOffset: 0.08  }, // 파랑 (두꺼움)
+  { color: [45,   45,  45], hRatio: 0.006, yOffset: 0.135 }, // 검정 (얇음)
+  { color: [220,  30,  30], hRatio: 0.030, yOffset: 0.185 }, // 빨강 (두꺼움)
+];
+
+
+function drawQuoteAnim() {
+  if (t < QUOTE_DURATION) t++;
+
+  let moveEnd    = 25;
+  let barEnd     = 60;
+  let wedgeStart = 65;
+
+  // ── HELLO 위치 계산 ───────────────────────────────────
+  push();
+  textSize(width * 0.13);
+  textFont('Noto Sans KR, sans-serif');
+  let letters      = ['H', 'E', 'L', 'L', 'O'];
+  let totalW       = textWidth('HELLO');
+  let centerStartX = width * 0.5 - totalW * 0.5;
+  let helloStartX  = width * 0.07;
+  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let offsets      = [];
+  for (let i = 0; i < letters.length; i++) {
+    let ox = 0;
+    for (let j = 0; j < i; j++) ox += textWidth(letters[j]);
+    offsets.push(ox);
+  }
+  let oRightEdge = centerStartX + offsets[4] + textWidth('O');
+  let fontSize   = width * 0.13;
+  pop();
+
+  let helloY   = height * 0.5 - fontSize * 0.5;
+  let helloBotY = helloY + fontSize * 0.85; // HELLO 바로 아래
+
+  // ── HELLO 그리기 ─────────────────────────────────────
+  for (let i = 0; i < letters.length; i++) {
+    let x, y;
+    if (t <= moveEnd) {
+      let prog = constrain(t / moveEnd, 0, 1);
+      let ease = prog * prog * (3 - 2 * prog);
+      x = lerp(helloStartX + offsets[i], centerStartX + offsets[i], ease);
+      y = lerp(helloStartY, helloY, ease);
+    } else {
+      x = centerStartX + offsets[i];
+      y = helloY;
+    }
+    noStroke();
+    fill(45);
+    textAlign(LEFT, TOP);
+    textStyle(BOLD);
+    textSize(fontSize);
+    textFont('Noto Sans KR, sans-serif');
+    text(letters[i], x, y);
+  }
+
+  // ── 직선 3개: HELLO 바로 아래, O 끝 기준으로 오른쪽으로 사라짐 ──
+// ── 직선 3개: H보다 왼쪽에서 시작, O 끝에서 사라짐 ──
+  if (t >= moveEnd) {
+    let bars = [
+      { color: [30, 100, 220], h: height * 0.025, y: helloBotY + height * 0.005  },
+      { color: [45,  45,  45], h: height * 0.006, y: helloBotY + height * 0.042  },
+      { color: [220, 30,  30], h: height * 0.032, y: helloBotY + height * 0.060  },
+    ];
+
+    for (let i = 0; i < 3; i++) {
+      let bar    = bars[i];
+      let delay  = i * 4;
+      let localT = max(0, t - moveEnd - delay);
+      let prog   = constrain(localT / 20, 0, 1);
+      let ease   = prog * prog;
+      let moveX  = ease * width * 2.0;
+
+      // 시작점: H보다 왼쪽
+      let startX = centerStartX - width * 0.05;
+      let left   = startX + moveX;
+      let currentW = oRightEdge - left;
+
+      if (currentW > 0 && left < oRightEdge) {
+        noStroke();
+        fill(bar.color[0], bar.color[1], bar.color[2]);
+        rect(left, bar.y, currentW, bar.h);
+      }
+    }
+  }
+
+  // ── 빵빠레: 양옆에서 위→아래 순서로 ────────
+ if (t >= wedgeStart) {
+    let wedgeT   = t - wedgeStart;
+    let wedgeMaxLen = width * 0.6; // 화면 밖까지 충분히 길게
+    let lTipX    = centerStartX - width * 0.02;
+    let rTipX    = centerStartX + totalW + width * 0.02;
+    let tipY     = helloY + fontSize * 0.5;
+    let innerH   = height * 0.10; // 안쪽 변 두께
+    
+    // 3개 동시에, delay 없음
+    let prog  = constrain(wedgeT / 18, 0, 1);
+    let ease  = 1 - pow(1 - prog, 3);
+    let len   = ease * wedgeMaxLen;
+
+    // 3개의 중심 각도 (위/중/아래)
+    let angles = [-PI * 0.28, 0, PI * 0.28];
+    let spread = 0.28; // 각 사각형의 퍼지는 범위
+
+    noStroke();
+    fill(45);
+
+    // 화면 밖으로 클리핑
+    drawingContext.save();
+for (let i = 0; i < 3; i++) {
+      let delay  = i * 10; // 위→아래 순서로
+      let localT = max(0, wedgeT - delay);
+      let prog   = constrain(localT / 18, 0, 1);
+      let ease   = 1 - pow(1 - prog, 3);
+      let len    = ease * wedgeMaxLen;
+
+      let a = angles[i];
+
+      // 왼쪽: 안쪽 끝에서 왼쪽 바깥으로 뻗어나감
+      // 안쪽 변의 위아래 좌표
+      let lInnerTopX = lTipX;
+      let lInnerTopY = tipY + sin(a - spread * 0.1) * innerH;
+      let lInnerBotX = lTipX;
+      let lInnerBotY = tipY + sin(a + spread * 0.1) * innerH;
+      // 바깥쪽 변 (화면 밖까지)
+      let lOuterTopX = lTipX - cos(a - spread) * len;
+      let lOuterTopY = tipY  + sin(a - spread) * len;
+      let lOuterBotX = lTipX - cos(a + spread) * len;
+      let lOuterBotY = tipY  + sin(a + spread) * len;
+
+      beginShape();
+      vertex(lInnerTopX, lInnerTopY);
+      vertex(lOuterTopX, lOuterTopY);
+      vertex(lOuterBotX, lOuterBotY);
+      vertex(lInnerBotX, lInnerBotY);
+      endShape(CLOSE);
+
+      // 오른쪽: 안쪽 끝에서 오른쪽 바깥으로 뻗어나감
+      let rInnerTopX = rTipX;
+      let rInnerTopY = tipY + sin(a - spread * 0.1) * innerH;
+      let rInnerBotX = rTipX;
+      let rInnerBotY = tipY + sin(a + spread * 0.1) * innerH;
+      let rOuterTopX = rTipX + cos(a - spread) * len;
+      let rOuterTopY = tipY  + sin(a - spread) * len;
+      let rOuterBotX = rTipX + cos(a + spread) * len;
+      let rOuterBotY = tipY  + sin(a + spread) * len;
+
+      beginShape();
+      vertex(rInnerTopX, rInnerTopY);
+      vertex(rOuterTopX, rOuterTopY);
+      vertex(rOuterBotX, rOuterBotY);
+      vertex(rInnerBotX, rInnerBotY);
+      endShape(CLOSE);
+    }
+
+    drawingContext.restore();
+
+  }
+
+  if (t >= QUOTE_DURATION) resetToIdle();
+}
+// ─────────────────────────────────────────────────────
+//  작은따옴표 애니메이션
+// ─────────────────────────────────────────────────────
+const SQ_DURATION = 130;
+
+// 원 4개 정의 (O 오른쪽 기준 위치, 크기)
+// 1번 이미지 기준: 작→중→중→대 순서로 대각선 방향 배치
+const SQ_BUBBLES = [
+  { dx: 0.03, dy:  0.02, r: 0.012, delay: 0  }, // 제일 작은
+  { dx: 0.02, dy:  0.07, r: 0.020, delay: 8  }, // 작은
+  { dx: 0.09, dy:  0.04, r: 0.032, delay: 16 }, // 중간
+  { dx: 0.10, dy: -0.07, r: 0.045, delay: 24 }, // 큰
+];
+
+
+function drawSingleQuoteAnim() {
+  if (t < SQ_DURATION) t++;
+  
+  let SQ_ELLIPSE_ANGLES = [
+    PI * 0.65,   // 제일 작은: 아래쪽
+    PI * 0.35,   // 작은: 우하향
+    PI * 0.1,    // 중간: 거의 수평
+    -PI * 0.25,  // 큰: 우상향
+  ];
+
+  let fadeEnd    = 30;  // 회색으로 변하는 구간
+  let bubbleEnd  = 80;  // 원 등장 완료
+  let ellipseStart = 85; // 타원으로 변하기 시작
+
+  // ── HELLO 색상: 진한회색 → 연한회색 ─────────────────
+  let grayVal;
+  if (t <= fadeEnd) {
+    let prog = constrain(t / fadeEnd, 0, 1);
+    let ease = prog * prog;
+    // 45(진한회색) → 100(중간회색) → 180(연한회색) 두 단계
+    if (prog < 0.5) {
+      grayVal = lerp(45, 100, prog * 2);
+    } else {
+      grayVal = lerp(100, 180, (prog - 0.5) * 2);
+    }
+  } else {
+    grayVal = 180;
+  }
+
+  // HELLO 위치 (첫 화면 위치 그대로)
+  push();
+  textSize(width * 0.13);
+  textFont('Noto Sans KR, sans-serif');
+  let letters     = ['H', 'E', 'L', 'L', 'O'];
+  let offsets     = [];
+  for (let i = 0; i < letters.length; i++) {
+    let ox = 0;
+    for (let j = 0; j < i; j++) ox += textWidth(letters[j]);
+    offsets.push(ox);
+  }
+  let oRightX = width * 0.07 + offsets[4] + textWidth('O');
+  let helloCY = height * 0.28 + width * 0.13 * 0.5;
+  pop();
+
+  // HELLO 그리기
+  noStroke();
+  fill(grayVal);
+  textAlign(LEFT, TOP);
+  textStyle(BOLD);
+  textSize(width * 0.13);
+  textFont('Noto Sans KR, sans-serif');
+  text('HELLO', width * 0.07, height * 0.28);
+
+  // ── 원들 뿅뿅뿅 등장 ─────────────────────────────────
+  if (t >= fadeEnd) {
+    for (let i = 0; i < SQ_BUBBLES.length; i++) {
+      let b      = SQ_BUBBLES[i];
+      let localT = max(0, t - fadeEnd - b.delay);
+      if (localT <= 0) continue;
+
+      let bx = oRightX + width  * b.dx;
+      let by = helloCY + height * b.dy;
+      let r  = width * b.r;
+
+      if (t < ellipseStart) {
+        // 원 등장: 크기 0에서 뿅
+        let prog = constrain(localT / 12, 0, 1);
+        let ease = 1 - pow(1 - prog, 3);
+        let cr   = ease * r;
+        noStroke();
+        fill(180);
+        circle(bx, by, cr * 2);
+
+      } else {
+        // 타원으로 변하며 퍼짐
+        let ellipseT = t - ellipseStart;
+        let prog     = constrain(ellipseT / 20, 0, 1);
+        let ease     = 1 - pow(1 - prog, 3);
+
+        // 원 → 타원: 가로는 길어지고 세로는 줄어듦
+        let rW = lerp(r, r * 3.5, ease); // 가로 반지름
+        let rH = lerp(r, r * 0.35, ease); // 세로 반지름
+
+        // 퍼져나가는 거리
+        let dist = ease * (width * 0.06 + r * 1.5);
+
+        let angle = SQ_ELLIPSE_ANGLES[i];
+
+        noStroke();
+        fill(180);
+        push();
+        translate(bx + cos(angle) * dist, by + sin(angle) * dist);
+        rotate(angle);
+        ellipse(0, 0, rW * 2, rH * 2);
+        pop();
+      }
+    }
+  }
+
+  if (t >= SQ_DURATION) resetToIdle();
+
+//  붙임표 애니메이션
+// ─────────────────────────────────────────────────────
+const HYPHEN_DURATION = 120;
+
+function drawHyphenAnim() {
+  if (t < HYPHEN_DURATION) t++;
+
+  let moveEnd  = 25;
+  let pauseEnd = 31;
+
+  // ── HELLO 위치 계산 ───────────────────────────────────
+  push();
+  textSize(width * 0.13);
+  textFont('Noto Sans KR, sans-serif');
+  let letters      = ['H', 'E', 'L', 'L', 'O'];
+  let totalW       = textWidth('HELLO');
+  let centerStartX = width * 0.5 - totalW * 0.5;
+  let helloStartX  = width * 0.07;
+  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let fontSize     = width * 0.13;
+  let offsets      = [];
+  let charWidths   = [];
+  for (let i = 0; i < letters.length; i++) {
+    let ox = 0;
+    for (let j = 0; j < i; j++) ox += textWidth(letters[j]);
+    offsets.push(ox);
+    charWidths.push(textWidth(letters[i]));
+  }
+  pop();
+
+  let helloY   = height * 0.5 - fontSize * 0.5;
+  let boxH     = fontSize * 1.1; // 박스 높이 = 글자 높이
+  let boxTop   = helloY - fontSize * 0.05; // 박스 상단 y
+
+  // ── 빨간 박스: HELLO보다 먼저 그려서 아래 레이어 ────────
+  if (t >= pauseEnd) {
+    let gap = width * 0.004; // 박스 사이 간격
+
+    for (let i = 0; i < 5; i++) {
+      let delay    = i * 8;
+      let localT   = max(0, t - pauseEnd - delay);
+      if (localT <= 0) continue;
+
+      let prog     = constrain(localT / 15, 0, 1);
+      let ease     = 1 - pow(1 - prog, 3);
+      let targetY  = boxTop;
+      let startY   = boxTop - boxH;
+      let currentY = lerp(startY, targetY, ease);
+
+      let bx = centerStartX + offsets[i] + gap * 0.5;
+      let bw = charWidths[i] - gap;
+
+      push();
+      drawingContext.save();
+      drawingContext.beginPath();
+      drawingContext.rect(bx, boxTop, bw, boxH);
+      drawingContext.clip();
+      noStroke();
+      fill(220, 30, 0);
+      rect(bx, currentY, bw, boxH);
+      drawingContext.restore();
+      pop();
+    }
+  }
+
+  // ── HELLO 그리기 (박스보다 위 레이어) ───────────────────
+  for (let i = 0; i < letters.length; i++) {
+    let x, y;
+    if (t <= moveEnd) {
+      let prog = constrain(t / moveEnd, 0, 1);
+      let ease = prog * prog * (3 - 2 * prog);
+      x = lerp(helloStartX + offsets[i], centerStartX + offsets[i], ease);
+      y = lerp(helloStartY, helloY, ease);
+    } else {
+      x = centerStartX + offsets[i];
+      y = helloY;
+    }
+    noStroke();
+    fill(45);
+    textAlign(LEFT, TOP);
+    textStyle(BOLD);
+    textSize(fontSize);
+    textFont('Noto Sans KR, sans-serif');
+    text(letters[i], x, y);
+  }
+
+  if (t >= HYPHEN_DURATION) resetToIdle();
+}
+}
+//  홀화살괄호 애니메이션
+// ─────────────────────────────────────────────────────
+const ANGLE_DURATION = 130;
+
+function drawAngleAnim() {
+  if (t < ANGLE_DURATION) t++;
+
+  let moveEnd  = 25;
+  let pauseEnd = 31;
+
+  push();
+  textSize(width * 0.13);
+  textFont('Noto Sans KR, sans-serif');
+  let letters      = ['H', 'E', 'L', 'L', 'O'];
+  let totalW       = textWidth('HELLO');
+  let centerStartX = width * 0.5 - totalW * 0.5;
+  let helloStartX  = width * 0.07;
+  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let fontSize     = width * 0.13;
+  let offsets      = [];
+  for (let i = 0; i < letters.length; i++) {
+    let ox = 0;
+    for (let j = 0; j < i; j++) ox += textWidth(letters[j]);
+    offsets.push(ox);
+  }
+  
+  pop();
+
+  let helloY  = height * 0.5 - fontSize * 0.5;
+  let helloCX = width * 0.5;
+  let helloCY = height * 0.5;
+
+  // 이미지 기준 사각형 정의
+  // { x, y, w, h, delay } (비율 기준)
+ // HELLO의 실제 좌표 계산
+  let helloLeft  = centerStartX;
+  let helloRight = centerStartX + totalW;
+  let helloTop   = helloY;
+  let helloBotY  = helloY + fontSize;
+  let pad        = fontSize * 0.2; 
+
+  // 이미지 기준으로 HELLO 크기에 비례한 사각형 정의
+  let rects = [
+    // 가로 막대
+    { x: helloLeft  + totalW * 0.1,  y: helloTop  - pad * 4.5, w: totalW * 0.72, h: fontSize * 0.38, delay: 0  }, // 위 큰 가로
+    { x: helloLeft  - totalW * 0.05, y: helloTop  - pad * 1.5, w: totalW * 0.52, h: fontSize * 0.06, delay: 15 }, // 위 얇은 가로
+    { x: helloLeft  + totalW * 0.04, y: helloBotY + pad * 0.5, w: totalW * 0.55, h: fontSize * 0.38, delay: 5  }, // 아래 큰 가로
+    { x: helloLeft  + totalW * 0.28, y: helloBotY + pad * 3.0, w: totalW * 0.38, h: fontSize * 0.05, delay: 20 }, // 아래 얇은 가로
+
+    // 좌측 세로 막대
+    { x: helloLeft  - pad * 8.0, y: helloTop  - pad * 1.5, w: fontSize * 0.10, h: fontSize * 1.80, delay: 8  }, // 좌 긴 것
+    { x: helloLeft  - pad * 5.0, y: helloTop  - pad * 0.5, w: fontSize * 0.12, h: fontSize * 1.30, delay: 18 }, // 좌 중간
+    { x: helloLeft  - pad * 3.2, y: helloTop  + pad * 0.5, w: fontSize * 0.10, h: fontSize * 0.90, delay: 25 }, // 좌 짧은 것
+
+    // 우측 세로 막대
+    { x: helloRight + pad * 1.2, y: helloTop  - pad * 1.5, w: fontSize * 0.10, h: fontSize * 1.60, delay: 3  }, // 우 긴 것
+    { x: helloRight + pad * 2.8, y: helloTop  - pad * 0.5, w: fontSize * 0.12, h: fontSize * 1.20, delay: 12 }, // 우 중간
+    { x: helloRight + pad * 4.5, y: helloTop  + pad * 0.5, w: fontSize * 0.10, h: fontSize * 1.30, delay: 22 }, // 우 짧은 것
+  ];
+  // ── 사각형들 그리기 (HELLO보다 먼저 → 아래 레이어) ──────
+ if (t >= pauseEnd) {
+    for (let r of rects) {
+      let localT = max(0, t - pauseEnd - r.delay);
+      if (localT <= 0) continue;
+      let prog = constrain(localT / 12, 0, 1);
+      let ease = 1 - pow(1 - prog, 3);
+
+      // r.x, r.y, r.w, r.h는 이미 픽셀값이므로 width/height 곱하지 않음
+      let rw = r.w * ease;
+      let rh = r.h * ease;
+
+      noStroke();
+      fill(45);
+      rect(
+        r.x + (r.w - rw) * 0.5,
+        r.y + (r.h - rh) * 0.5,
+        rw, rh
+      );
+    }
+  }
+  // ── HELLO 그리기 (위 레이어) ─────────────────────────
+  for (let i = 0; i < letters.length; i++) {
+    let x, y;
+    if (t <= moveEnd) {
+      let prog = constrain(t / moveEnd, 0, 1);
+      let ease = prog * prog * (3 - 2 * prog);
+      x = lerp(helloStartX + offsets[i], centerStartX + offsets[i], ease);
+      y = lerp(helloStartY, helloY, ease);
+    } else {
+      x = centerStartX + offsets[i];
+      y = helloY;
+    }
+    noStroke();
+    fill(45);
+    textAlign(LEFT, TOP);
+    textStyle(BOLD);
+    textSize(fontSize);
+    textFont('Noto Sans KR, sans-serif');
+    text(letters[i], x, y);
+  }
+
+  if (t >= ANGLE_DURATION) resetToIdle();
+}// ─────────────────────────────────────────────────────
+//  소괄호 애니메이션
+// ─────────────────────────────────────────────────────
+const PAREN_DURATION = 140;
+
+// 원 정의 (HELLO 중심 기준 상대 위치)
+// dx: HELLO 왼쪽/오른쪽 끝에서의 거리 비율, dy: 세로 위치
+const PAREN_BUBBLES = [
+  // 왼쪽 원들 (dx 음수 = 왼쪽)
+  { side: 'L', dx: -0.18, dy: -0.02, r: 0.048, delay: 0  }, // 큰 원
+  { side: 'L', dx: -0.10, dy:  0.06, r: 0.032, delay: 8  }, // 중간 원
+  { side: 'L', dx: -0.08, dy: -0.08, r: 0.022, delay: 16 }, // 작은 원
+  { side: 'L', dx: -0.14, dy: -0.12, r: 0.012, delay: 24 }, // 아주 작은 원
+  // 오른쪽 원들 (dx 양수 = 오른쪽)
+  { side: 'R', dx:  0.10, dy:  0.06, r: 0.042, delay: 4  }, // 큰 원
+  { side: 'R', dx:  0.06, dy: -0.06, r: 0.028, delay: 12 }, // 중간 원
+  { side: 'R', dx:  0.14, dy: -0.04, r: 0.018, delay: 20 }, // 작은 원
+  { side: 'R', dx:  0.18, dy:  0.00, r: 0.010, delay: 28 }, // 아주 작은 원
+];
+
+function drawParenAnim() {
+  if (t < PAREN_DURATION) t++;
+
+  let moveEnd    = 25;
+  let pauseEnd   = 31;
+  let bubbleEnd  = 80;  // 원 등장 완료
+  let gatherStart = 85; // 원들이 모여들기 시작
+
+  push();
+  textSize(width * 0.13);
+  textFont('Noto Sans KR, sans-serif');
+  let letters      = ['H', 'E', 'L', 'L', 'O'];
+  let totalW       = textWidth('HELLO');
+  let centerStartX = width * 0.5 - totalW * 0.5;
+  let helloStartX  = width * 0.07;
+  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let fontSize     = width * 0.13;
+  let offsets      = [];
+  for (let i = 0; i < letters.length; i++) {
+    let ox = 0;
+    for (let j = 0; j < i; j++) ox += textWidth(letters[j]);
+    offsets.push(ox);
+  }
+  pop();
+
+  let helloY    = height * 0.5 - fontSize * 0.5;
+  let helloCY   = height * 0.5;
+  let helloLeft = centerStartX;
+  let helloRight = centerStartX + totalW;
+
+  // ── 원들 그리기 ───────────────────────────────────────
+  if (t >= pauseEnd) {
+    for (let b of PAREN_BUBBLES) {
+      let localT = max(0, t - pauseEnd - b.delay);
+      if (localT <= 0) continue;
+
+      // 원의 기준 위치
+      let baseX = b.side === 'L'
+        ? helloLeft  + width  * b.dx
+        : helloRight + width  * b.dx;
+      let baseY = helloCY + height * b.dy;
+      let r     = width * b.r;
+
+      let bx, by;
+
+      if (t < gatherStart) {
+        // 등장: 크기 0에서 뿅
+        let prog = constrain(localT / 12, 0, 1);
+        let ease = 1 - pow(1 - prog, 3);
+        bx = baseX;
+        by = baseY;
+
+        noStroke();
+        fill(150, 200, 255);
+        circle(bx, by, r * 2 * ease);
+
+     } else {
+        let gatherT = t - gatherStart;
+        let prog    = constrain(gatherT / 30, 0, 1);
+        let ease    = prog * prog * (3 - 2 * prog);
+
+        // 2번 이미지 기준으로 각 원의 목표 위치를 명시적으로 지정
+      let targets = {
+          // 왼쪽
+          'L0': { tx: helloLeft - fontSize * 0.7,  ty: helloCY + fontSize * 0.15 },
+          'L1': { tx: helloLeft - fontSize * 0.25, ty: helloCY + fontSize * 0.90 },
+          'L2': { tx: helloLeft - fontSize * 0.35, ty: helloCY - fontSize * 0.45 },
+          'L3': { tx: helloLeft - fontSize * 0.75, ty: helloCY - fontSize * 0.55 },
+          // 오른쪽
+          'R0': { tx: helloRight + fontSize * 0.35, ty: helloCY + fontSize * 0.45 },
+          'R1': { tx: helloRight + fontSize * 0.10, ty: helloCY - fontSize * 0.45 },
+          'R2': { tx: helloRight + fontSize * 0.55, ty: helloCY - fontSize * 0.55 },
+          'R3': { tx: helloRight + fontSize * 0.70, ty: helloCY + fontSize * 0.05 },
+        };
+        let idx = PAREN_BUBBLES.indexOf(b);
+        let sideIdx = b.side === 'L' ? idx : idx - 4;
+        let key = b.side + sideIdx;
+        let target = targets[key];
+
+        bx = lerp(baseX, target.tx, ease);
+        by = lerp(baseY, target.ty, ease);
+
+        noStroke();
+        fill(150, 200, 255);
+        circle(bx, by, r * 2);
+      }
+    }
+  }
+
+  // ── HELLO 그리기 ─────────────────────────────────────
+  for (let i = 0; i < letters.length; i++) {
+    let x, y;
+    if (t <= moveEnd) {
+      let prog = constrain(t / moveEnd, 0, 1);
+      let ease = prog * prog * (3 - 2 * prog);
+      x = lerp(helloStartX + offsets[i], centerStartX + offsets[i], ease);
+      y = lerp(helloStartY, helloY, ease);
+    } else if (t >= gatherStart) {
+      // 원이 모여들 때 HELLO도 약간 가운데로 압축
+      let gatherT = t - gatherStart;
+      let prog    = constrain(gatherT / 30, 0, 1);
+      let ease    = prog * prog * (3 - 2 * prog);
+      // 각 글자가 중앙으로 살짝 모임
+      let targetX = width * 0.5 - textWidth(letters[i]) * 0.5;
+      x = lerp(centerStartX + offsets[i], targetX, ease * 0.3);
+      y = helloY;
+    } else {
+      x = centerStartX + offsets[i];
+      y = helloY;
+    }
+    noStroke();
+    fill(45);
+    textAlign(LEFT, TOP);
+    textStyle(BOLD);
+    textSize(fontSize);
+    textFont('Noto Sans KR, sans-serif');
+    text(letters[i], x, y);
+  }
+
+  if (t >= PAREN_DURATION) resetToIdle();
+}
+// ─────────────────────────────────────────────────────
+//  중괄호 애니메이션
+// ─────────────────────────────────────────────────────
+const BRACE_DURATION = 150;
+
+function drawBraceAnim() {
+  if (t < BRACE_DURATION) t++;
+
+  let letterEnd  = 50;  // 글자 내려오기 완료
+  let shapeStart = 55;  // 요소 뻗어나오기 시작
+  let shapeEnd   = 100; // 요소 완료
+  let coverStart = 105; // 배경 내려오기 시작
+  let coverEnd   = 135; // 배경 완전히 덮음
+  let endFrame   = 141; // 0.1초(6프레임) 후 종료
+
+  let letters   = ['H', 'E', 'L', 'L', 'O'];
+  let fontSize  = width * 0.13;
+  let hX        = width * 0.07;
+  let hY        = height * 0.12; // 첫 화면 H 위치
+
+  // 각 글자의 목표 y 위치 (세로로 배치)
+  let targetYs = [
+    hY,
+    hY + fontSize * 1.1,
+    hY + fontSize * 2.2,
+    hY + fontSize * 3.3,
+    hY + fontSize * 4.4,
+  ];
+
+  // 요소 시작 x (글자 오른쪽)
+  push();
+  textSize(fontSize);
+  textFont('Noto Sans KR, sans-serif');
+  let charWidths = letters.map(l => textWidth(l));
+  pop();
+
+  let shapeStartX = hX + charWidths[0] + width * 0.03;
+  let shapeEndX   = width * 0.83;
+  let shapeH      = fontSize * 0.55; // 요소 높이
+
+  // ── 글자 그리기 ───────────────────────────────────────
+  for (let i = 0; i < letters.length; i++) {
+    let y;
+    if (i === 0) {
+      y = hY; // H는 고정
+    } else {
+      let appearFrame = i * 7; // 빠른 속도
+      let localT = max(0, t - appearFrame);
+      let prog   = constrain(localT / 12, 0, 1);
+      let ease   = 1 - pow(1 - prog, 2); // easeOutQuad
+      y = lerp(hY, targetYs[i], ease);
+    }
+    noStroke();
+    fill(45);
+    textAlign(LEFT, TOP);
+    textStyle(BOLD);
+    textSize(fontSize);
+    textFont('Noto Sans KR, sans-serif');
+    text(letters[i], hX, y);
+  }
+
+  // ── 요소들 뻗어나오기 ─────────────────────────────────
+  if (t >= shapeStart) {
+    for (let i = 0; i < 5; i++) {
+      let delay  = i * 6;
+      let localT = max(0, t - shapeStart - delay);
+      if (localT <= 0) continue;
+
+      let prog = constrain(localT / 15, 0, 1);
+      let ease = 1 - pow(1 - prog, 3);
+      let cy   = targetYs[i] + fontSize * 0.25; // 각 글자 세로 중앙
+      let w    = ease * (shapeEndX - shapeStartX);
+
+      noStroke();
+
+      if (i === 0) {
+        // H: 노란 사각형
+        fill(255, 210, 0);
+        rect(shapeStartX, cy - shapeH * 0.5, w, shapeH);
+
+      } else if (i === 1) {
+        // E: 보라색 양끝 둥근 사각형
+        fill(180, 0, 220);
+        rect(shapeStartX, cy - shapeH * 0.3, w, shapeH * 0.6, shapeH * 0.3);
+
+      } else if (i === 2) {
+        // L(위): 검정 직선 2개
+        fill(20, 20, 20);
+        rect(shapeStartX, cy - shapeH * 0.3, w, shapeH * 0.08);
+        rect(shapeStartX, cy + shapeH * 0.1, w, shapeH * 0.08);
+
+      } else if (i === 3) {
+        // L(아래): 파란 직선 2개
+        fill(30, 120, 220);
+        rect(shapeStartX, cy - shapeH * 0.3, w, shapeH * 0.08);
+        rect(shapeStartX, cy + shapeH * 0.1, w, shapeH * 0.08);
+
+      } else if (i === 4) {
+        // O: 진보라 짧은 사각형 3개
+        fill(80, 0, 100);
+        let boxW = w * 0.22;
+        let gap  = w * 0.12;
+        for (let j = 0; j < 3; j++) {
+          rect(shapeStartX + j * (boxW + gap), cy - shapeH * 0.4, boxW, shapeH * 0.7);
+        }
+      }
+    }
+  }
+
+  // ── 연보라 배경이 위에서 내려옴 ──────────────────────
+  if (t >= coverStart) {
+    let prog    = constrain((t - coverStart) / (coverEnd - coverStart), 0, 1);
+    let ease    = prog * prog * (3 - 2 * prog);
+    let coverH  = ease * height;
+
+    noStroke();
+    fill(150, 150, 255);
+    rect(0, 0, width, coverH);
+  }
+
+  if (t >= endFrame) resetToIdle();
+}
+// ─────────────────────────────────────────────────────
+//  대괄호 애니메이션
+// ─────────────────────────────────────────────────────
+const BRACKET_DURATION = 120;
+
+function drawBracketAnim() {
+  if (t < BRACKET_DURATION) t++;
+
+  let moveEnd   = 25;
+  let pauseEnd  = 31;
+  let mergeEnd  = 80; // 합쳐짐 완료
+   let endFrame = mergeEnd + 24;
+
+  push();
+  textSize(width * 0.13);
+  textFont('Noto Sans KR, sans-serif');
+  let letters      = ['H', 'E', 'L', 'L', 'O'];
+  let totalW       = textWidth('HELLO');
+  let centerStartX = width * 0.5 - totalW * 0.5;
+  let helloStartX  = width * 0.07;
+  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let fontSize     = width * 0.13;
+  let offsets      = [];
+  for (let i = 0; i < letters.length; i++) {
+    let ox = 0;
+    for (let j = 0; j < i; j++) ox += textWidth(letters[j]);
+    offsets.push(ox);
+  }
+  pop();
+
+  let helloY = height * 0.5 - fontSize * 0.5;
+  let cx     = width * 0.5;
+  let cy     = height * 0.5;
+
+  // 타원 크기
+  let ellipseW = width  * 0.75; // 완성된 타원 가로 반지름
+  let ellipseH = height * 0.55; // 완성된 타원 세로 반지름
+
+  // ── HELLO 그리기 (타원보다 아래 레이어) ──────────────
+  for (let i = 0; i < letters.length; i++) {
+    let x, y;
+    if (t <= moveEnd) {
+      let prog = constrain(t / moveEnd, 0, 1);
+      let ease = prog * prog * (3 - 2 * prog);
+      x = lerp(helloStartX + offsets[i], centerStartX + offsets[i], ease);
+      y = lerp(helloStartY, helloY, ease);
+    } else {
+      x = centerStartX + offsets[i];
+      y = helloY;
+    }
+    noStroke();
+    fill(45);
+    textAlign(LEFT, TOP);
+    textStyle(BOLD);
+    textSize(fontSize);
+    textFont('Noto Sans KR, sans-serif');
+    text(letters[i], x, y);
+  }
+
+  // ── 타원 그리기 (HELLO보다 위 레이어) ────────────────
+  if (t >= pauseEnd) {
+    let localT = t - pauseEnd;
+    let prog   = constrain(localT / (mergeEnd - pauseEnd), 0, 1);
+    // easeInQuad: 처음엔 느리다가 점점 빠르게
+    let ease   = prog * prog * prog;
+
+    // 왼쪽 반타원: 화면 왼쪽 끝에서 중앙으로 이동
+    // 시작: cx - ellipseW (화면 왼쪽 밖), 끝: cx
+    let leftX  = lerp(-ellipseW, cx, ease);
+    // 오른쪽 반타원: 화면 오른쪽 끝에서 중앙으로 이동
+    let rightX = lerp(width + ellipseW, cx, ease);
+
+    noStroke();
+    fill(30, 120, 220); // 파란색
+
+    // 왼쪽 반타원 (오른쪽 절반만 보임 → 왼쪽이 평평)
+    push();
+    translate(leftX, cy);
+    // 클리핑: x <= 0 부분만 그림 (오른쪽 절반)
+    drawingContext.save();
+    drawingContext.beginPath();
+    drawingContext.rect(-ellipseW, -ellipseH, ellipseW, ellipseH * 2);
+    drawingContext.clip();
+    ellipse(0, 0, ellipseW * 2, ellipseH * 2);
+    drawingContext.restore();
+    pop();
+
+    // 오른쪽 반타원 (왼쪽 절반만 보임 → 오른쪽이 평평)
+    push();
+    translate(rightX, cy);
+    drawingContext.save();
+    drawingContext.beginPath();
+    drawingContext.rect(0, -ellipseH, ellipseW, ellipseH * 2);
+    drawingContext.clip();
+    ellipse(0, 0, ellipseW * 2, ellipseH * 2);
+    drawingContext.restore();
+    pop();
+  }
+
+  if (t >= endFrame) resetToIdle();
+}
+// ─────────────────────────────────────────────────────
+//  밑줄 애니메이션
+// ─────────────────────────────────────────────────────
+const UNDERSCORE_DURATION = 130;
+
+function drawUnderscoreAnim() {
+  if (t < UNDERSCORE_DURATION) t++;
+
+  let moveEnd   = 25;
+  let pauseEnd  = 31;
+  let fadeStart = 100;
+
+  push();
+  textSize(width * 0.13);
+  textFont('Noto Sans KR, sans-serif');
+  let letters      = ['H', 'E', 'L', 'L', 'O'];
+  let totalW       = textWidth('HELLO');
+  let centerStartX = width * 0.5 - totalW * 0.5;
+  let helloStartX  = width * 0.07;
+  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let fontSize     = width * 0.13;
+  let offsets      = [];
+  for (let i = 0; i < letters.length; i++) {
+    let ox = 0;
+    for (let j = 0; j < i; j++) ox += textWidth(letters[j]);
+    offsets.push(ox);
+  }
+  pop();
+
+  let helloY = height * 0.5 - fontSize * 0.5;
+
+  // 방사형 도형 개수와 회전 속도
+  let count     = 6;   // 도형 개수
+  let rotSpeed  = 0.025; // 회전 속도 (라디안/프레임)
+  let rotation  = t * rotSpeed; // 현재 회전각
+
+  // 도형 크기
+  let shapeW1 = width  * 0.06; // 짧은 변
+  let shapeW2 = width  * 0.10; // 긴 변
+  let shapeH  = height * 0.18; // 높이
+  let dist    = width  * 0.22; // 중심에서 도형까지 거리
+
+  let alpha = t > fadeStart
+    ? map(t, fadeStart, UNDERSCORE_DURATION, 255, 0)
+    : 255;
+
+  // ── 좌측 하단 방사형 ──────────────────────────────────
+  if (t >= pauseEnd) {
+    let lx = width  * 0.08;
+    let ly = height * 0.85;
+
+    for (let i = 0; i < count; i++) {
+      let angle = (TWO_PI / count) * i + rotation;
+      push();
+      translate(lx + cos(angle) * dist, ly + sin(angle) * dist);
+      rotate(angle + HALF_PI);
+      noStroke();
+      fill(220, 40, 0, alpha);
+      // 이등변사각형 (위쪽이 좁고 아래쪽이 넓은)
+      beginShape();
+      vertex(-shapeW1 / 2, -shapeH / 2);
+      vertex( shapeW1 / 2, -shapeH / 2);
+      vertex( shapeW2 / 2,  shapeH / 2);
+      vertex(-shapeW2 / 2,  shapeH / 2);
+      endShape(CLOSE);
+      pop();
+    }
+  }
+
+  // ── 우측 상단 방사형 ──────────────────────────────────
+  if (t >= pauseEnd) {
+    let rx = width  * 0.92;
+    let ry = height * 0.15;
+
+    for (let i = 0; i < count; i++) {
+      let angle = (TWO_PI / count) * i - rotation; // 반대 방향
+      push();
+      translate(rx + cos(angle) * dist, ry + sin(angle) * dist);
+      rotate(angle + HALF_PI);
+      noStroke();
+      fill(220, 40, 0, alpha);
+      beginShape();
+      vertex(-shapeW1 / 2, -shapeH / 2);
+      vertex( shapeW1 / 2, -shapeH / 2);
+      vertex( shapeW2 / 2,  shapeH / 2);
+      vertex(-shapeW2 / 2,  shapeH / 2);
+      endShape(CLOSE);
+      pop();
+    }
+  }
+
+  // ── HELLO 그리기 ─────────────────────────────────────
+  for (let i = 0; i < letters.length; i++) {
+    let x, y;
+    if (t <= moveEnd) {
+      let prog = constrain(t / moveEnd, 0, 1);
+      let ease = prog * prog * (3 - 2 * prog);
+      x = lerp(helloStartX + offsets[i], centerStartX + offsets[i], ease);
+      y = lerp(helloStartY, helloY, ease);
+    } else {
+      x = centerStartX + offsets[i];
+      y = helloY;
+    }
+    noStroke();
+    fill(45);
+    textAlign(LEFT, TOP);
+    textStyle(BOLD);
+    textSize(fontSize);
+    textFont('Noto Sans KR, sans-serif');
+    text(letters[i], x, y);
+  }
+
+  if (t >= UNDERSCORE_DURATION) resetToIdle();
+}
+// ─────────────────────────────────────────────────────
+//  물결표 애니메이션
+// ─────────────────────────────────────────────────────
+const TILDE_DURATION = 180;
+
+function drawTildeAnim() {
+  if (t < TILDE_DURATION) t++;
+
+  let lineEnd   = 20;  // 검은 직선 완성
+  let fadeStart = 155;
+
+  let fontSize  = width * 0.13;
+  let hX        = width * 0.07; // H 고정 위치
+  let hY        = height * 0.28;
+  let lineY  = height * 0.62; // 0.28+fontSize*1.05 → 더 아래로
+  let waveY = hY + fontSize + (lineY - hY - fontSize) * 0.5;
+  let circles = [
+    { x: width * 0.20, baseY: lineY + height * 0.08, delay: 22 },
+    { x: width * 0.33, baseY: lineY + height * 0.14, delay: 38 },
+    { x: width * 0.47, baseY: lineY + height * 0.07, delay: 54 },
+    { x: width * 0.65, baseY: lineY + height * 0.06, delay: 70 },
+  ];
+  let circleR = width * 0.025;
+
+  // 각 원이 나타날 때 글자 이동 타이밍
+  // 원 1 등장 → ello 이동 (e가 원1 x위치까지)
+  // 원 2 등장 → llo 이동 (l이 원2 x위치까지)
+  // 원 3 등장 → lo 이동 (l이 원3 x위치까지)
+  // 원 4 등장 → o 이동 (o가 원4 x위치까지)
+
+  push();
+  textSize(fontSize);
+  textFont('Noto Sans KR, sans-serif');
+  let hW = textWidth('H');
+  let eW = textWidth('E');
+  let l1W = textWidth('L');
+  let l2W = textWidth('L');
+  let oW = textWidth('O');
+  pop();
+
+  // 각 글자의 초기 x위치
+  let initX = {
+    H: hX,
+    E: hX + hW,
+    L1: hX + hW + eW,
+    L2: hX + hW + eW + l1W,
+    O: hX + hW + eW + l1W + l2W,
+  };
+
+  // 각 글자의 목표 x위치 계산
+  // 원1: e가 circles[0].x 에 도달
+  let eTarget1  = circles[0].x;
+  let l1Target1 = eTarget1 + eW;
+  let l2Target1 = l1Target1 + l1W;
+  let oTarget1  = l2Target1 + l2W;
+
+  // 원2: l1이 circles[1].x 에 도달
+  let l1Target2 = circles[1].x;
+  let l2Target2 = l1Target2 + l1W;
+  let oTarget2  = l2Target2 + l2W;
+
+  // 원3: l2가 circles[2].x 에 도달
+  let l2Target3 = circles[2].x;
+  let oTarget3  = l2Target3 + l2W;
+
+  // 원4: o가 circles[3].x 에 도달
+  let oTarget4 = circles[3].x;
+
+  // 각 글자의 현재 x 위치 계산
+  function getLetterX(initPos, targets, delays) {
+    let x    = initPos;
+    let from = initPos;
+    for (let i = 0; i < targets.length; i++) {
+      let localT = max(0, t - delays[i]);
+      let prog   = constrain(localT / 15, 0, 1);
+      let ease   = 1 - pow(1 - prog, 3);
+      x = lerp(from, targets[i], ease);
+      if (prog >= 1) {
+        from = targets[i];
+        continue;
+      }
+      break;
+    }
+    return x;
+  }
+
+  // 글자별 y 오프셋 (통통 튀는 효과)
+  function getBounceY(delays) {
+    let bounceY = 0;
+    for (let i = 0; i < delays.length; i++) {
+      let localT = max(0, t - delays[i]);
+      if (localT <= 0) continue;
+      let bounce = sin(localT * 0.35) * exp(-localT * 0.1);
+      bounceY = -abs(bounce) * height * 0.04;
+    }
+    return bounceY;
+  }
+
+  let eX  = getLetterX(initX.E,  [eTarget1],  [circles[0].delay]);
+  let l1X = getLetterX(initX.L1, [l1Target1, l1Target2], [circles[0].delay, circles[1].delay]);
+  let l2X = getLetterX(initX.L2, [l2Target1, l2Target2, l2Target3], [circles[0].delay, circles[1].delay, circles[2].delay]);
+  let oX  = getLetterX(initX.O,  [oTarget1, oTarget2, oTarget3, oTarget4], [circles[0].delay, circles[1].delay, circles[2].delay, circles[3].delay]);
+
+  // 물결선 끝 x좌표 = O의 오른쪽 끝
+  let waveEndX;
+  if (t < circles[0].delay) {
+    waveEndX = hX + hW; // H까지
+  } else if (t < circles[1].delay) {
+    waveEndX = eX + eW; // E까지
+  } else if (t < circles[2].delay) {
+    waveEndX = l1X + l1W; // L까지
+  } else if (t < circles[3].delay) {
+    waveEndX = l2X + l2W; // L까지
+  } else {
+    waveEndX = oX + oW; // O까지
+  }
+
+  let alpha = t > fadeStart ? map(t, fadeStart, TILDE_DURATION, 255, 0) : 255;
+
+  // ── 검은 직선 ─────────────────────────────────────────
+  let lineProg = constrain(t / lineEnd, 0, 1);
+  let lineEase = 1 - pow(1 - lineProg, 3);
+  noStroke();
+  fill(45, 45, 45, alpha);
+  rect(0, lineY, width * lineEase, height * 0.008);
+
+  // ── 빨간 원 (통통 튀는 효과) ─────────────────────────
+  for (let i = 0; i < circles.length; i++) {
+    let c      = circles[i];
+    let localT = max(0, t - c.delay);
+    if (localT <= 0) continue;
+
+    // 튀는 효과: sin으로 위아래 진동하다가 안정
+   let bounce = sin(localT * 0.25) * exp(-localT * 0.08);
+    let cy     = c.baseY - abs(bounce) * height * 0.08;
+
+    noStroke();
+    fill(220, 40, 0, alpha);
+    circle(c.x, cy, circleR * 2);
+  }
+
+  // ── HELLO 글자 ────────────────────────────────────────
+  let eBounce  = getBounceY([circles[0].delay]);
+  let l1Bounce = getBounceY([circles[0].delay, circles[1].delay]);
+  let l2Bounce = getBounceY([circles[0].delay, circles[1].delay, circles[2].delay]);
+  let oBounce  = getBounceY([circles[0].delay, circles[1].delay, circles[2].delay, circles[3].delay]);
+
+  noStroke();
+  fill(45, 45, 45, alpha);
+  textAlign(LEFT, TOP);
+  textStyle(BOLD);
+  textSize(fontSize);
+  textFont('Noto Sans KR, sans-serif');
+  text('H', hX,  hY);
+  text('E', eX,  hY + eBounce);
+  text('L', l1X, hY + l1Bounce);
+  text('L', l2X, hY + l2Bounce);
+  text('O', oX,  hY + oBounce);
+  // ── 물결선 (HELLO 길이에 맞게) ───────────────────────
+  if (t >= lineEnd) {
+    let waveStartX = hX;
+    let waveAmp  = height * 0.018; // 진폭 작게
+    let waveFreq = width  * 0.045; // 주기 길게
+    
+    stroke(220, 150, 0, alpha);
+    strokeWeight(width * 0.006);
+    noFill();
+    beginShape();
+    for (let x = waveStartX; x <= waveEndX; x += 2) {
+      let y = waveY + sin((x / waveFreq) * TWO_PI) * waveAmp;
+      vertex(x, y);
+    }
+    endShape();
+  }
+
+  if (t >= TILDE_DURATION) resetToIdle();
+}
 
 // ─────────────────────────────────────────────────────
 //  공통 함수들
@@ -783,6 +2116,7 @@ function resetToIdle() {
   lastBlink = millis();
   qParticles = [];
   exParticles = [];
+  colonParticles = [];
 }
 
 // ─────────────────────────────────────────────────────
@@ -805,6 +2139,36 @@ function keyPressed() {
     state = 'input';
     } else if (key === '/') {
     inputChar = '/';
+    state = 'input';
+    } else if (key === ':') {
+    inputChar = ':';
+    state = 'input';
+      } else if (key === '"') {
+    inputChar = '"';
+    state = 'input';
+      } else if (key === "'") {
+    inputChar = "'";
+    state = 'input';
+     } else if (key === '-') {
+    inputChar = '-';
+    state = 'input';
+     } else if (key === '<' || key === '>') {
+    inputChar = key;
+    state = 'input';
+     } else if (key === '(' || key === ')') {
+    inputChar = key;
+    state = 'input';
+      } else if (key === '{' || key === '}') {
+    inputChar = key;
+    state = 'input';
+      } else if (key === '[' || key === ']') {
+    inputChar = key;
+    state = 'input';
+      } else if (key === '_') {
+    inputChar = '_';
+    state = 'input';
+      } else if (key === '~') {
+    inputChar = '~';
     state = 'input';
   } else if (keyCode === ENTER) {
     if (state === 'input') {
