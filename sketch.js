@@ -217,7 +217,7 @@ function initQuestionAnim() {
       alpha: 255
     });
 
-    // 원
+    // 주황 작은 원
     let smallSpeed = width * 0.013;
     qParticles.push({
       type: 'circle',
@@ -228,9 +228,42 @@ function initQuestionAnim() {
       color: [220, 20, 60],
       alpha: 255
     });
+    
+    // 제일 안쪽 초록 선 레이어 추가
+ let outCount = 8; // 원하는 개수로 조절
+  for (let i = 0; i < outCount; i++) {
+    let angle = (TWO_PI / outCount) * i;
+    let innerSpeed = width * 0.008; // 제일 느림
+    qParticles.push({
+      type: 'line',
+      x: cx, y: cy,
+      vx: cos(angle) * innerSpeed,
+      vy: sin(angle) * innerSpeed,
+      len: width * 0.04,
+      lineAngle: angle,
+      color: [154, 205, 50],
+      alpha: 255
+    });
+  }
+
+  // 제일 바깥쪽 주황 원 레이어 추가
+  let outerCount = 20; // 원하는 개수로 조절
+  for (let i = 0; i < outerCount; i++) {
+    let angle = (TWO_PI / outerCount) * i;
+    let outerSpeed = width * 0.022;
+    qParticles.push({
+      type: 'circle',
+      x: cx, y: cy,
+      vx: cos(angle) * outerSpeed,
+      vy: sin(angle) * outerSpeed,
+      r: width * 0.008,
+      color: [220, 20, 60],
+      alpha: 255
+    });
+  }
 
     // 노란 큰 원 (3방향마다)
-    if (i % 2 === 0) {
+    if (i % 3 === 0) {
       let bigSpeed = width * 0.008;
       qParticles.push({
         type: 'circle',
@@ -238,7 +271,7 @@ function initQuestionAnim() {
         vx: cos(angle) * bigSpeed,
         vy: sin(angle) * bigSpeed,
         r: width * 0.038,
-        color: [255, 215, 0],
+        color: [255, 220, 0],
         alpha: 255
       });
     }
@@ -260,13 +293,17 @@ function initQuestionAnim() {
     let lx = helloStartX + offsetX;
     let ly = helloStartY;
     let angle = atan2(ly - cy, lx - cx);
-    let speed = width * 0.016;
+    let speed = width * 0.006; // 조금만 날아감
     qParticles.push({
       type: 'letter',
       char: letters[i],
       x: lx, y: ly,
       vx: cos(angle) * speed,
       vy: sin(angle) * speed,
+      bounceT: 0,
+      landed: false,
+      landX: lx + cos(angle) * width * 0.06, // 착지 위치
+      landY: ly + sin(angle) * width * 0.06,
       rotate: random(-0.03, 0.03),
       currentAngle: random(-0.2, 0.2),
       size: width * 0.09,
@@ -308,7 +345,19 @@ function drawQuestionAnim() {
     }
 
     if (p.type === 'letter') {
-      p.currentAngle += p.rotate * 0.05;
+      if (!p.landed) {
+        // 착지 위치로 이동
+        p.x = lerp(p.x, p.landX, 0.25);
+        p.y = lerp(p.y, p.landY, 0.25);
+        if (dist(p.x, p.y, p.landX, p.landY) < 2) {
+          p.landed = true;
+        }
+      } else {
+        // 착지 후 통통 튀기
+        p.bounceT += 1;
+        let bounceY = sin(p.bounceT * 0.60) * exp(-p.bounceT * 0.06) * height * 0.06;
+        p.y = p.landY + bounceY;
+      }
       noStroke();
       fill(p.color[0], p.color[1], p.color[2], p.alpha);
       textAlign(CENTER, CENTER);
@@ -544,7 +593,7 @@ function drawCommaAnim() {
   let letterSize = height * 0.14;
   let hX         = width * 0.07;
   // H의 고정 위치
- let hY = height * 0.28;
+ let hY = height * 0.15;
 
   // H는 항상 제자리
   noStroke();
@@ -659,14 +708,16 @@ function initSlashAnim() {
   let letters2 = ['H', 'E', 'L', 'L', 'O'];
   for (let i = 0; i < letters2.length; i++) {
     slashLetters.push({
-      char: letters2[i],
-      centerX: centerStartX + offsets[i],
-      centerY: height * 0.5 - width * 0.065,
-      targetX: targets[i].x,
-      targetY: targets[i].y,
-      scattered: false,
-      scatterFrame: 0
-    });
+    char: letters[i],
+    centerX: centerStartX + offsets[i],
+    centerY: height * 0.5 - width * 0.065,
+    targetX: targets[i].x,
+    targetY: targets[i].y,
+    midX: i === 3 ? width * 0.55 : i === 4 ? width * 0.67 : undefined,
+    midY: i === 3 ? height * 0.50 : i === 4 ? height * 0.20 : undefined,
+    scattered: false,
+    scatterFrame: 0
+  });
   }
 }
 
@@ -706,6 +757,16 @@ function drawSlashAnim() {
     { x: width * 0.74, y: height * 0.72 },
     { x: width * 0.88, y: height * 0.22 },
   ];
+
+   if (t >= pauseEnd + 2 * lineDelay && !slashLetters[3].scattered) {
+    slashLetters[3].scattered    = true;
+    slashLetters[3].scatterFrame = t;
+  }
+  if (t >= pauseEnd + 3 * lineDelay && !slashLetters[4].scattered) {
+    slashLetters[4].scattered    = true;
+    slashLetters[4].scatterFrame = t;
+  }
+
   // ── 선 그리기 ────────────────────────────────────────
   for (let i = 0; i < 5; i++) {
     let startTime = pauseEnd + i * lineDelay;
@@ -728,9 +789,11 @@ function drawSlashAnim() {
     line(p1.x, p1.y, ex, ey);
 
     // 선이 글자에 가까워지면 미리 글자 흩어짐
-   if (progress >= 0.1 && !slashLetters[i].scattered) {
-      slashLetters[i].scattered  = true;
-      slashLetters[i].scatterFrame = t;
+   if (i < 3) {
+      if (progress >= 0.01 && !slashLetters[i].scattered) {
+        slashLetters[i].scattered    = true;
+        slashLetters[i].scatterFrame = t;
+      }
     }
   }
 
@@ -895,29 +958,7 @@ function drawColonAnim() {
       pop();
     }
   }
-
-  // ── HELLO 그리기 (원보다 위 레이어) ─────────────────
-  for (let i = 0; i < letters.length; i++) {
-    let x, y;
-    if (t <= moveEnd) {
-      let prog = constrain(t / moveEnd, 0, 1);
-      let ease = prog * prog * (3 - 2 * prog);
-      x = lerp(helloStartX + offsets[i], centerStartX + offsets[i], ease);
-      y = lerp(helloStartY, height * 0.5 - width * 0.065, ease);
-    } else {
-      x = centerStartX + offsets[i];
-      y = height * 0.5 - width * 0.065;
-    }
-    noStroke();
-    fill(45);
-    textAlign(LEFT, TOP);
-    textStyle(BOLD);
-    textSize(width * 0.13);
-    textFont('Noto Sans KR, sans-serif');
-    text(letters[i], x, y);
-  }
-
-  // ── 선들 퍼져나감 (splitEnd 이후) ───────────────────
+   // ── 선들 퍼져나감 ───────────────────
   if (t >= splitEnd) {
     let alpha = t > fadeStart ? map(t, fadeStart, COLON_DURATION, 255, 0) : 255;
 
@@ -947,6 +988,28 @@ function drawColonAnim() {
       }
     }
   }
+  // ── HELLO 그리기 (원보다 위 레이어) ─────────────────
+  for (let i = 0; i < letters.length; i++) {
+    let x, y;
+    if (t <= moveEnd) {
+      let prog = constrain(t / moveEnd, 0, 1);
+      let ease = prog * prog * (3 - 2 * prog);
+      x = lerp(helloStartX + offsets[i], centerStartX + offsets[i], ease);
+      y = lerp(helloStartY, height * 0.5 - width * 0.065, ease);
+    } else {
+      x = centerStartX + offsets[i];
+      y = height * 0.5 - width * 0.065;
+    }
+    noStroke();
+    fill(45);
+    textAlign(LEFT, TOP);
+    textStyle(BOLD);
+    textSize(width * 0.13);
+    textFont('Noto Sans KR, sans-serif');
+    text(letters[i], x, y);
+  }
+
+
 
   if (t >= COLON_DURATION) {
     colonParticles = [];
@@ -1019,17 +1082,17 @@ function drawQuoteAnim() {
   // ── 직선 3개: HELLO 바로 아래, O 끝 기준으로 오른쪽으로 사라짐 ──
 // ── 직선 3개: H보다 왼쪽에서 시작, O 끝에서 사라짐 ──
   if (t >= moveEnd) {
-    let bars = [
-      { color: [0, 0, 205], h: height * 0.025, y: helloBotY + height * 0.005  },
-      { color: [45,  45,  45], h: height * 0.006, y: helloBotY + height * 0.042  },
-      { color: [220, 20, 60], h: height * 0.032, y: helloBotY + height * 0.060  },
+     let bars = [
+      { color: [30, 100, 220], h: height * 0.025, y: helloBotY + height * 0.04  },
+      { color: [45,  45,  45], h: height * 0.006, y: helloBotY + height * 0.08  },
+      { color: [220, 30,  30], h: height * 0.032, y: helloBotY + height * 0.11  },
     ];
 
     for (let i = 0; i < 3; i++) {
       let bar    = bars[i];
       let delay  = i * 4;
       let localT = max(0, t - moveEnd - delay);
-      let prog   = constrain(localT / 20, 0, 1);
+      let prog   = constrain(localT / 35, 0, 1);
       let ease   = prog * prog;
       let moveX  = ease * width * 2.0;
 
@@ -1273,7 +1336,7 @@ function drawHyphenAnim() {
 
   // ── 빨간 박스: HELLO보다 먼저 그려서 아래 레이어 ────────
   if (t >= pauseEnd) {
-    let gap = width * 0.004; // 박스 사이 간격
+    let gap = width * 0.004;
 
     for (let i = 0; i < 5; i++) {
       let delay    = i * 8;
@@ -1284,21 +1347,14 @@ function drawHyphenAnim() {
       let ease     = 1 - pow(1 - prog, 3);
       let targetY  = boxTop;
       let startY   = boxTop - boxH;
-      let currentY = lerp(startY, targetY, ease);
+      let currentH = ease * boxH; // 클리핑 대신 높이를 키우는 방식
 
       let bx = centerStartX + offsets[i] + gap * 0.5;
       let bw = charWidths[i] - gap;
 
-      push();
-      drawingContext.save();
-      drawingContext.beginPath();
-      drawingContext.rect(bx, boxTop, bw, boxH);
-      drawingContext.clip();
       noStroke();
       fill(220, 20, 60);
-      rect(bx, currentY, bw, boxH);
-      drawingContext.restore();
-      pop();
+      rect(bx, boxTop, bw, currentH);
     }
   }
 
@@ -1370,18 +1426,18 @@ function drawAngleAnim() {
   let rects = [
     // 가로 막대
     { x: helloLeft  + totalW * 0.1,  y: helloTop  - pad * 4.5, w: totalW * 0.72, h: fontSize * 0.38, delay: 0  }, // 위 큰 가로
-    { x: helloLeft  - totalW * 0.05, y: helloTop  - pad * 1.5, w: totalW * 0.52, h: fontSize * 0.06, delay: 15 }, // 위 얇은 가로
+    { x: helloLeft  - totalW * 0.05, y: helloTop  - pad * 1.5, w: totalW * 0.80, h: fontSize * 0.06, delay: 15 }, // 위 얇은 가로
     { x: helloLeft  + totalW * 0.04, y: helloBotY + pad * 0.5, w: totalW * 0.55, h: fontSize * 0.38, delay: 5  }, // 아래 큰 가로
     { x: helloLeft  + totalW * 0.28, y: helloBotY + pad * 3.0, w: totalW * 0.38, h: fontSize * 0.05, delay: 20 }, // 아래 얇은 가로
 
     // 좌측 세로 막대
-    { x: helloLeft  - pad * 8.0, y: helloTop  - pad * 1.5, w: fontSize * 0.10, h: fontSize * 1.80, delay: 8  }, // 좌 긴 것
+    { x: helloLeft  - pad * 8.0, y: helloTop  - pad * 3.0, w: fontSize * 0.10, h: fontSize * 2.80, delay: 8  }, // 좌 긴 것
     { x: helloLeft  - pad * 5.0, y: helloTop  - pad * 0.5, w: fontSize * 0.12, h: fontSize * 1.30, delay: 18 }, // 좌 중간
     { x: helloLeft  - pad * 3.2, y: helloTop  + pad * 0.5, w: fontSize * 0.10, h: fontSize * 0.90, delay: 25 }, // 좌 짧은 것
 
     // 우측 세로 막대
     { x: helloRight + pad * 1.2, y: helloTop  - pad * 1.5, w: fontSize * 0.10, h: fontSize * 1.60, delay: 3  }, // 우 긴 것
-    { x: helloRight + pad * 2.8, y: helloTop  - pad * 0.5, w: fontSize * 0.12, h: fontSize * 1.20, delay: 12 }, // 우 중간
+    { x: helloRight + pad * 2.8, y: helloTop  - pad * 5.0, w: fontSize * 0.12, h: fontSize * 3.20, delay: 12 }, // 우 중간
     { x: helloRight + pad * 4.5, y: helloTop  + pad * 0.5, w: fontSize * 0.10, h: fontSize * 1.30, delay: 22 }, // 우 짧은 것
   ];
   // ── 사각형들 그리기 (HELLO보다 먼저 → 아래 레이어) ──────
@@ -1573,6 +1629,15 @@ function drawParenAnim() {
 // ─────────────────────────────────────────────────────
 const BRACE_DURATION = 150;
 
+function getLetterY(i, t, hY, fontSize, targetYs) {
+  let appearFrame = i * 7;
+  let localT = max(0, t - appearFrame);
+  if (localT <= 0) return -fontSize * 2;
+  let prog = constrain(localT / 12, 0, 1);
+  let ease = 1 - pow(1 - prog, 2);
+  return lerp(hY - fontSize, targetYs[i], ease);
+}
+
 function drawBraceAnim() {
   if (t < BRACE_DURATION) t++;
 
@@ -1584,17 +1649,17 @@ function drawBraceAnim() {
   let endFrame   = 141; // 0.1초(6프레임) 후 종료
 
   let letters   = ['H', 'E', 'L', 'L', 'O'];
-  let fontSize  = width * 0.13;
+  let fontSize  = min(width * 0.13, height * 0.16); // 높이 기준으로도 제한
   let hX        = width * 0.07;
-  let hY        = height * 0.12; // 첫 화면 H 위치
+  let hY        = height * 0.05;
+  let letterGap = (height * 0.88) / 5;
 
-  // 각 글자의 목표 y 위치 (세로로 배치)
   let targetYs = [
     hY,
-    hY + fontSize * 1.1,
-    hY + fontSize * 2.2,
-    hY + fontSize * 3.3,
-    hY + fontSize * 4.4,
+    hY + letterGap,
+    hY + letterGap * 2,
+    hY + letterGap * 3,
+    hY + letterGap * 4,
   ];
 
   // 요소 시작 x (글자 오른쪽)
@@ -1609,17 +1674,9 @@ function drawBraceAnim() {
   let shapeH      = fontSize * 0.55; // 요소 높이
 
   // ── 글자 그리기 ───────────────────────────────────────
-  for (let i = 0; i < letters.length; i++) {
-    let y;
-    if (i === 0) {
-      y = hY; // H는 고정
-    } else {
-      let appearFrame = i * 7; // 빠른 속도
-      let localT = max(0, t - appearFrame);
-      let prog   = constrain(localT / 12, 0, 1);
-      let ease   = 1 - pow(1 - prog, 2); // easeOutQuad
-      y = lerp(hY, targetYs[i], ease);
-    }
+   for (let i = 0; i < letters.length; i++) {
+    let y = i === 0 ? hY : getLetterY(i, t, hY, fontSize, targetYs); // 인자 추가
+    if (y < -fontSize) continue;
     noStroke();
     fill(45);
     textAlign(LEFT, TOP);
