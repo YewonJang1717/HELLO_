@@ -1610,7 +1610,7 @@ function drawBraceAnim() {
   let shapeEnd   = 100; 
   let coverStart = 105; 
   let coverEnd   = 135; 
-  let endFrame   = 141;
+  let endFrame   = 150;
 
   let letters   = ['H', 'E', 'L', 'L', 'O'];
   let fontSize  = min(width * 0.13, height * 0.16); 
@@ -1714,7 +1714,7 @@ function drawBracketAnim() {
   let moveEnd   = 25;
   let pauseEnd  = 31;
   let mergeEnd  = 80; 
-   let endFrame = mergeEnd + 24;
+   let endFrame = mergeEnd + 30;
 
   push();
   textSize(width * 0.13);
