@@ -69,7 +69,7 @@ function setup() {
         let itemIndex = Math.floor(clickedY / itemH);
 
         if (itemIndex >= 0 && itemIndex < MENU_ITEMS.length) {
-          let punctuations = ['.','?','!',',','/','()','{}'  ,'[]','"',"'",'-',':','~','_','<>'];
+          let punctuations = ['.','?','!',',','/','()','{}','[]','"',"'",'-',':','~','_','<>'];
           let punct = punctuations[itemIndex];
 
           if (punct === '()') inputChar = '(';
@@ -636,17 +636,17 @@ function drawCommaAnim() {
  for (let i = 1; i < letters.length; i++) {
     let appearFrame = i * 12;
     if (t < appearFrame) continue;
-
     let localT   = t - appearFrame;
     let progress = constrain(localT / 25, 0, 1);
     let ease     = 1 - (1 - progress) * (1 - progress);
     let targetY  = hY + letterSize * i;
     let startY   = height * 0.28; 
     let y        = lerp(startY, targetY, ease);
+    let xOffset  = (i === 4) ? -width * 0.005 : 0;
 
     noStroke();
     fill(45);
-    text(letters[i], hX, y);
+    text(letters[i], hX + xOffset, y);
   }
   if (t < helloEndFrame) {
   let lastBarEnd = helloEndFrame + BAR_DELAYS[4] + 35 + 6;
@@ -1639,13 +1639,14 @@ function drawBraceAnim() {
    for (let i = 0; i < letters.length; i++) {
     let y = i === 0 ? hY : getLetterY(i, t, hY, fontSize, targetYs); 
     if (y < -fontSize) continue;
+    let xOffset = (i === 4) ? -width * 0.005 : 0;
     noStroke();
     fill(45);
     textAlign(LEFT, TOP);
     textStyle(BOLD);
     textSize(fontSize);
     textFont('Noto Sans KR, sans-serif');
-    text(letters[i], hX, y);
+    text(letters[i], hX + xOffset, y);
   }
 
   if (t >= shapeStart) {
@@ -1681,8 +1682,8 @@ function drawBraceAnim() {
 
       } else if (i === 4) {
         fill(45, 45, 45);
-        let boxW = w * 0.22;
-        let gap  = w * 0.12;
+        let boxW = w * 0.28;
+        let gap  = w * 0.08;
         for (let j = 0; j < 3; j++) {
           rect(shapeStartX + j * (boxW + gap), cy - shapeH * 0.4, boxW, shapeH * 0.7);
         }
