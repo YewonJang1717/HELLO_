@@ -9,7 +9,7 @@ const BLINK_INTERVAL = 530;
 let t = 0;
 const DURATION = 90;
 
-const C_DARK = [45,  45,  45];
+const C_DARK = [44,  44,  44];
 const C_PURP = [75, 0, 130];
 const C_NAVY = [0,  0, 205];
 
@@ -89,7 +89,7 @@ function setup() {
 }
 
 function draw() {
-  background(255);
+  background(250,250,248);
 
   if (state === 'idle') {
     drawIdleScreen();
@@ -147,7 +147,7 @@ function drawIdleScreen() {
     let cursorX = startX + helloWidth + width * 0.012;
     let cursorY = height * 0.5 - width * 0.065 + width * 0.13 * 0.75;
     noStroke();
-    fill(45);
+    fill(44, 44, 44);
     rect(cursorX, cursorY, width * 0.055, width * 0.008);
   }
 }
@@ -327,11 +327,9 @@ function initQuestionAnim() {
   let centerStartX = width * 0.5 - totalW * 0.5;
   let helloStartX  = width * 0.5 - totalW * 0.5;
   let helloStartY  = height * 0.5 - fontSize * 0.5;
-  let offsets      = [];
+let offsets = [];
   for (let i = 0; i < letters.length; i++) {
-    let ox = 0;
-    for (let j = 0; j < i; j++) ox += textWidth(letters[j]);
-    offsets.push(ox);
+    offsets.push(textWidth(letters.slice(0, i).join('')));
   }
 
   for (let i = 0; i < letters.length; i++) {
@@ -355,8 +353,8 @@ function initQuestionAnim() {
       landY: ly + sin(angle) * width * 0.06,
       rotate: random(-0.03, 0.03),
       currentAngle: random(-0.2, 0.2),
-      size: width * 0.09,
-      color: [45, 45, 45],
+      size: width * 0.13,
+      color: [44, 44, 44],
       alpha: 255
     });
   }
@@ -434,7 +432,7 @@ function initExclamationAnim() {
 
   let ringColors = [
     [220, 20, 60],
-    [45, 45, 45],
+    [44, 44, 44],
     [220, 20, 60],
   ];
   for (let i = 0; i < 3; i++) {
@@ -483,16 +481,16 @@ function initExclamationAnim() {
   let centerStartX = width * 0.5 - totalW * 0.5;
   let helloStartX  = width * 0.5 - totalW * 0.5;
   let helloStartY  = height * 0.5 - width * 0.065;
-  
+
+  let offsets = [];
+  for (let i = 0; i < letters.length; i++) {
+    offsets.push(textWidth(letters.slice(0, i).join('')));
+  }
 
   for (let i = 0; i < letters.length; i++) {
-    let offsetX = 0;
-    for (let j = 0; j < i; j++) {
-      offsetX += textWidth(letters[j]);
-    }
-    let startX = helloStartX + offsetX;
-    let startY = helloStartY;
-    let targetX = centerStartX + offsetX;
+    let startX  = helloStartX + offsets[i];
+    let startY  = helloStartY;
+    let targetX = width * 0.5 - totalW * 0.5 + offsets[i];
     let targetY = height * 0.5;
 
     exParticles.push({
@@ -506,8 +504,8 @@ function initExclamationAnim() {
       burstSpeed: width * 0.022,
       rotate: random(-0.04, 0.04),
       currentAngle: 0,
-      size: width * 0.09,
-      color: [45, 45, 45],
+      size: width * 0.13,
+      color: [44, 44, 44],
       alpha: 255
     });
   }
@@ -626,7 +624,7 @@ function drawCommaAnim() {
  let hY = height * 0.15;
 
   noStroke();
-  fill(45);
+  fill(44, 44, 44);
   textAlign(LEFT, TOP);
   textStyle(BOLD);
   textSize(letterSize);
@@ -645,7 +643,7 @@ function drawCommaAnim() {
     let xOffset  = (i === 4) ? -width * 0.005 : 0;
 
     noStroke();
-    fill(45);
+    fill(44, 44, 44);
     text(letters[i], hX + xOffset, y);
   }
   if (t < helloEndFrame) {
@@ -669,7 +667,7 @@ function drawCommaAnim() {
       let barH     = ease * maxBarH;
 
       fill(BAR_COLORS[i][0], BAR_COLORS[i][1], BAR_COLORS[i][2]);
-      stroke(45);
+      stroke(44, 44, 44);
       strokeWeight(strokeW);
       rect(cx - barW / 2 + strokeW / 2, ringCY, barW - strokeW, barH, barW / 2);
     }
@@ -678,7 +676,7 @@ function drawCommaAnim() {
   for (let i = 0; i < 5; i++) {
     let cx = width * RING_X[i];
     fill(255);
-    stroke(45);
+    stroke(44, 44, 44);
     strokeWeight(strokeW);
     circle(cx, ringCY, ringR * 2);
   }
@@ -712,9 +710,7 @@ function initSlashAnim() {
 
   let offsets = [];
   for (let i = 0; i < letters.length; i++) {
-    let ox = 0;
-    for (let j = 0; j < i; j++) ox += textWidth(letters[j]);
-    offsets.push(ox);
+    offsets.push(textWidth(letters.slice(0, i).join('')));
   }
   pop();
  
@@ -838,10 +834,10 @@ function drawSlashAnim() {
     }
 
     noStroke();
-    fill(45);
+    fill(44, 44, 44);
     textAlign(LEFT, TOP);
     textStyle(BOLD);
-    textSize(width * 0.09);
+    textSize(width * 0.13);
     textFont('Noto Sans KR, sans-serif');
     text(sl.char, x, y);
   }
@@ -866,7 +862,7 @@ function initColonAnim() {
     { angle:  0.6,  color: [75, 0, 130],  speed: width * 0.020, len: width * 0.22, thick: width * 0.022 }, 
     { angle:  2.0,  color: [75, 0, 130],  speed: width * 0.018, len: width * 0.16, thick: width * 0.018 }, 
     { angle:  2.6,  color: [154, 205, 50],  speed: width * 0.023, len: width * 0.08, thick: width * 0.030 }, 
-    { angle: -1.0,  color: [45,   45, 45],  speed: width * 0.021, len: width * 0.20, thick: width * 0.030 },
+    { angle: -1.0,  color: [44, 44, 44],  speed: width * 0.021, len: width * 0.20, thick: width * 0.030 },
   ];
   for (let l of lines) {
     colonParticles.push({
@@ -1009,7 +1005,7 @@ function drawColonAnim() {
       y = height * 0.5 - width * 0.065;
     }
     noStroke();
-    fill(45);
+    fill(44, 44, 44);
     textAlign(LEFT, TOP);
     textStyle(BOLD);
     textSize(width * 0.13);
@@ -1031,7 +1027,7 @@ const QUOTE_DURATION = 130;
 
 const QUOTE_BARS = [
   { color: [0, 0, 205], hRatio: 0.022, yOffset: 0.08  }, // 파랑 (두꺼움)
-  { color: [45,   45,  45], hRatio: 0.006, yOffset: 0.135 }, // 검정 (얇음)
+  { color: [44,   44,  44], hRatio: 0.006, yOffset: 0.135 }, // 검정 (얇음)
   { color: [220, 20, 60], hRatio: 0.030, yOffset: 0.185 }, // 빨강 (두꺼움)
 ];
 
@@ -1076,7 +1072,7 @@ function drawQuoteAnim() {
       y = helloY;
     }
     noStroke();
-    fill(45);
+    fill(44, 44, 44);
     textAlign(LEFT, TOP);
     textStyle(BOLD);
     textSize(fontSize);
@@ -1087,7 +1083,7 @@ function drawQuoteAnim() {
   if (t >= moveEnd) {
      let bars = [
       { color: [30, 100, 220], h: height * 0.025, y: helloBotY + height * 0.04  },
-      { color: [45,  45,  45], h: height * 0.006, y: helloBotY + height * 0.08  },
+      { color: [44,  44,  44], h: height * 0.006, y: helloBotY + height * 0.08  },
       { color: [220, 30,  30], h: height * 0.032, y: helloBotY + height * 0.11  },
     ];
 
@@ -1127,7 +1123,7 @@ function drawQuoteAnim() {
     let spread = 0.28; 
 
     noStroke();
-    fill(45);
+    fill(44, 44, 44);
 
     drawingContext.save();
 for (let i = 0; i < 3; i++) {
@@ -1355,7 +1351,7 @@ function drawHyphenAnim() {
       y = helloY;
     }
     noStroke();
-    fill(45);
+    fill(44, 44, 44);
     textAlign(LEFT, TOP);
     textStyle(BOLD);
     textSize(fontSize);
@@ -1429,7 +1425,7 @@ function drawAngleAnim() {
       let rh = r.h * ease;
 
       noStroke();
-      fill(45);
+      fill(44, 44, 44);
       rect(
         r.x + (r.w - rw) * 0.5,
         r.y + (r.h - rh) * 0.5,
@@ -1450,7 +1446,7 @@ function drawAngleAnim() {
       y = helloY;
     }
     noStroke();
-    fill(45);
+    fill(44, 44, 44);
     textAlign(LEFT, TOP);
     textStyle(BOLD);
     textSize(fontSize);
@@ -1578,7 +1574,7 @@ function drawParenAnim() {
       y = helloY;
     }
     noStroke();
-    fill(45);
+    fill(44, 44, 44);
     textAlign(LEFT, TOP);
     textStyle(BOLD);
     textSize(fontSize);
@@ -1641,7 +1637,7 @@ function drawBraceAnim() {
     if (y < -fontSize) continue;
     let xOffset = (i === 4) ? -width * 0.005 : 0;
     noStroke();
-    fill(45);
+    fill(44, 44, 44);
     textAlign(LEFT, TOP);
     textStyle(BOLD);
     textSize(fontSize);
@@ -1671,7 +1667,7 @@ function drawBraceAnim() {
         rect(shapeStartX, cy - shapeH * 0.3, w, shapeH * 0.6, shapeH * 0.3);
 
       } else if (i === 2) {
-        fill(45, 45, 45);
+        fill(44, 44, 44);
         rect(shapeStartX, cy - shapeH * 0.3, w, shapeH * 0.08);
         rect(shapeStartX, cy + shapeH * 0.1, w, shapeH * 0.08);
 
@@ -1681,7 +1677,7 @@ function drawBraceAnim() {
         rect(shapeStartX, cy + shapeH * 0.1, w, shapeH * 0.08);
 
       } else if (i === 4) {
-        fill(45, 45, 45);
+        fill(44, 44, 44);
         let boxW = w * 0.28;
         let gap  = w * 0.08;
         for (let j = 0; j < 3; j++) {
@@ -1752,7 +1748,7 @@ function drawBracketAnim() {
       y = helloY;
     }
     noStroke();
-    fill(45);
+    fill(44, 44, 44);
     textAlign(LEFT, TOP);
     textStyle(BOLD);
     textSize(fontSize);
@@ -1892,7 +1888,7 @@ function drawUnderscoreAnim() {
       y = helloY;
     }
     noStroke();
-    fill(45);
+    fill(44, 44, 44);
     textAlign(LEFT, TOP);
     textStyle(BOLD);
     textSize(fontSize);
@@ -2009,7 +2005,7 @@ function drawTildeAnim() {
   let lineProg = constrain(t / lineEnd, 0, 1);
   let lineEase = 1 - pow(1 - lineProg, 3);
   noStroke();
-  fill(45, 45, 45, alpha);
+  fill(44, 44, 44, alpha);
   rect(0, lineY, width * lineEase, height * 0.008);
 
   for (let i = 0; i < circles.length; i++) {
@@ -2031,7 +2027,7 @@ function drawTildeAnim() {
   let oBounce  = getBounceY([circles[0].delay, circles[1].delay, circles[2].delay, circles[3].delay]);
 
   noStroke();
-  fill(45, 45, 45, alpha);
+  fill(44, 44, 44, alpha);
   textAlign(LEFT, TOP);
   textStyle(BOLD);
   textSize(fontSize);
@@ -2081,7 +2077,7 @@ function drawHello(str) {
   textAlign(LEFT, TOP);
   textStyle(BOLD);
   textSize(width * 0.13);
-  fill(45);
+  fill(44, 44, 44);
   noStroke();
   textFont('Noto Sans KR, sans-serif');
   let startX = width * 0.5 - totalW * 0.5;
@@ -2179,7 +2175,7 @@ function drawMenu() {
   fill(255);
   rect(panelX, 0, panelW, panelH);
 
-  stroke(45);
+  stroke(44, 44, 44);
   strokeWeight(1.5);
   line(panelX + panelW, 0, panelX + panelW, panelH);
 
@@ -2203,7 +2199,7 @@ function drawMenu() {
     line(panelX, itemY + itemH, panelX + panelW, itemY + itemH);
 
     noStroke();
-    fill(45);
+    fill(44, 44, 44);
     textAlign(LEFT, CENTER);
     textStyle(NORMAL);
     textSize(fontSize);
@@ -2222,7 +2218,7 @@ function drawMenu() {
 
   drawMenuIcon(panelX + panelW * 0.65, panelH - itemH * 0.5, fontSize);
   noStroke();
-  fill(45);
+  fill(44, 44, 44);
   textAlign(RIGHT, CENTER);
   textSize(fontSize);
   textFont('Noto Sans KR, sans-serif');
@@ -2231,7 +2227,7 @@ function drawMenu() {
 
 function drawMenuIcon(x, y, size) {
   noStroke();
-  fill(45);
+  fill(44, 44, 44);
   let lineW = size * 1.8;
   let lineH = size * 0.18;
   let gap   = size * 0.5;
@@ -2247,7 +2243,7 @@ function drawMenuButton() {
 
   drawMenuIcon(bx + fontSize * 0.5, by, fontSize);
   noStroke();
-  fill(45);
+  fill(44, 44, 44);
   textAlign(LEFT, CENTER);
   textSize(fontSize);
   textFont('Noto Sans KR, sans-serif');
