@@ -24,9 +24,40 @@ const BARS = [
 
 let qParticles = [];
 let exParticles = [];
+let menuSlide = 0;
+let menuOpen = false;
+let menuTarget = 0;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
+  document.addEventListener('click', function(e) {
+    if (state === 'animating') return;
+    
+    let panelW   = width * 0.28;
+    let itemH    = height * 0.075;
+    let bx       = width * 0.02;
+    let by       = height * 0.92;
+    let fs       = width * 0.018;
+
+    // 좌측 하단 버튼 클릭
+    if (e.clientX > bx && e.clientX < bx + fs * 8 &&
+        e.clientY > by - fs * 2 && e.clientY < by + fs * 2) {
+      menuOpen   = !menuOpen;
+      menuTarget = menuOpen ? 1 : 0;
+      return;
+    }
+
+    // 패널 안 맨 아래 버튼 클릭
+    if (menuOpen) {
+      let panelX = -panelW + menuSlide * panelW;
+      if (e.clientX > panelX && e.clientX < panelX + panelW &&
+          e.clientY > height - itemH) {
+        menuOpen   = false;
+        menuTarget = 0;
+      }
+    }
+  });
 }
 
 function draw() {
@@ -37,38 +68,32 @@ function draw() {
   } else if (state === 'input') {
     drawInputScreen();
   } else if (state === 'animating') {
-    if (inputChar === '.') {
-      drawPeriodAnim();
-    } else if (inputChar === '?') {
-      drawQuestionAnim();
-    } else if (inputChar === '!') {
-      drawExclamationAnim();
-    } else if (inputChar === ',') {
-      drawCommaAnim();
-    } else if (inputChar === '/') {
-      drawSlashAnim();
-    } else if (inputChar === ':') {
-      drawColonAnim();
-    } else if (inputChar === '"') {
-      drawQuoteAnim();
-    } else if (inputChar === "'") {
-      drawSingleQuoteAnim();
-    } else if (inputChar === '-') {
-      drawHyphenAnim();
-    } else if (inputChar === '<' || inputChar === '>') {
-      drawAngleAnim();
-    } else if (inputChar === '(' || inputChar === ')') {
-      drawParenAnim();
-    } else if (inputChar === '{' || inputChar === '}') {
-      drawBraceAnim();
-    } else if (inputChar === '[' || inputChar === ']') {
-      drawBracketAnim();
-    } else if (inputChar === '_') {
-      drawUnderscoreAnim();
-    } else if (inputChar === '~') {
-      drawTildeAnim();
-    }
+    if (inputChar === '.') drawPeriodAnim();
+    else if (inputChar === '?') drawQuestionAnim();
+    else if (inputChar === '!') drawExclamationAnim();
+    else if (inputChar === ',') drawCommaAnim();
+    else if (inputChar === '/') drawSlashAnim();
+    else if (inputChar === ':') drawColonAnim();
+    else if (inputChar === '"') drawQuoteAnim();
+    else if (inputChar === "'") drawSingleQuoteAnim();
+    else if (inputChar === '-') drawHyphenAnim();
+    else if (inputChar === '<' || inputChar === '>') drawAngleAnim();
+    else if (inputChar === '(' || inputChar === ')') drawParenAnim();
+    else if (inputChar === '{' || inputChar === '}') drawBraceAnim();
+    else if (inputChar === '[' || inputChar === ']') drawBracketAnim();
+    else if (inputChar === '_') drawUnderscoreAnim();
+    else if (inputChar === '~') drawTildeAnim();
+  }
 
+   if (state !== 'animating') {
+    menuSlide = lerp(menuSlide, menuTarget, 0.12);
+    drawMenuButton();
+    if (menuSlide > 0.01) drawMenu();
+  } else {
+    if (menuSlide > 0.01) {
+      menuSlide = lerp(menuSlide, menuTarget, 0.12);
+      drawMenu();
+    }
   }
 }
 
@@ -85,11 +110,14 @@ function drawIdleScreen() {
   drawHello('HELLO');
 
   if (cursorVisible) {
+    push();
     textSize(width * 0.13);
     textFont('Noto Sans KR, sans-serif');
     let helloWidth = textWidth('HELLO');
-    let cursorX = width * 0.07 + helloWidth + width * 0.012;
-    let cursorY = height * 0.28 + width * 0.13 * 0.75;
+    pop();
+    let startX  = width * 0.5 - helloWidth * 0.5;
+    let cursorX = startX + helloWidth + width * 0.012;
+    let cursorY = height * 0.5 - width * 0.065 + width * 0.13 * 0.75;
     noStroke();
     fill(45);
     rect(cursorX, cursorY, width * 0.055, width * 0.008);
@@ -109,7 +137,7 @@ function drawPeriodAnim() {
 
   let commonRightEdge = width * (BARS[0].xRatio + BARS[0].wRatio);
 
-  let shrink = constrain(t / (DURATION * 0.25), 0, 1);
+  let shrink = constrain(t / (DURATION * 0.18), 0, 1);
   let shrinkEase = shrink * shrink;
   let fontSize = width * 0.13;
 
@@ -263,11 +291,20 @@ function initQuestionAnim() {
   }
 
   let letters = ['H', 'E', 'L', 'L', 'O'];
- push();
-  textSize(width * 0.13);
+  let fontSize = width * 0.13;
+  
+  textSize(fontSize);
   textFont('Noto Sans KR, sans-serif');
-  let helloStartX = width * 0.07;
-  let helloStartY = height * 0.28 + width * 0.13 * 0.5;
+  let totalW       = textWidth('HELLO');
+  let centerStartX = width * 0.5 - totalW * 0.5;
+  let helloStartX  = width * 0.5 - totalW * 0.5;
+  let helloStartY  = height * 0.5 - fontSize * 0.5;
+  let offsets      = [];
+  for (let i = 0; i < letters.length; i++) {
+    let ox = 0;
+    for (let j = 0; j < i; j++) ox += textWidth(letters[j]);
+    offsets.push(ox);
+  }
 
   for (let i = 0; i < letters.length; i++) {
     let offsetX = 0;
@@ -357,6 +394,7 @@ function drawQuestionAnim() {
   if (t >= DURATION) resetToIdle();
 }
 
+
 // ─────────────────────────────────────────────────────
 //  느낌표
 // ─────────────────────────────────────────────────────
@@ -411,13 +449,12 @@ function initExclamationAnim() {
     });
   }
   let letters = ['H', 'E', 'L', 'L', 'O'];
-  push();
   textSize(width * 0.13);
   textFont('Noto Sans KR, sans-serif');
-  let helloStartX = width * 0.07;
-  let helloStartY = height * 0.28 + width * 0.13 * 0.5;
-  let totalW = textWidth('HELLO');
+  let totalW       = textWidth('HELLO');
   let centerStartX = width * 0.5 - totalW * 0.5;
+  let helloStartX  = width * 0.5 - totalW * 0.5;
+  let helloStartY  = height * 0.5 - width * 0.065;
   
 
   for (let i = 0; i < letters.length; i++) {
@@ -692,8 +729,9 @@ function drawSlashAnim() {
   let letters      = ['H', 'E', 'L', 'L', 'O'];
   let totalW       = textWidth('HELLO');
   let centerStartX = width * 0.5 - totalW * 0.5;
-  let helloStartX  = width * 0.07;
-  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let totalWTemp = textWidth('HELLO');
+  let helloStartX = width * 0.5 - totalWTemp * 0.5;
+  let helloStartY = height * 0.5 - width * 0.065;
 
   let offsets = [];
   for (let i = 0; i < letters.length; i++) {
@@ -857,8 +895,8 @@ function drawColonAnim() {
   let letters      = ['H', 'E', 'L', 'L', 'O'];
   let totalW       = textWidth('HELLO');
   let centerStartX = width * 0.5 - totalW * 0.5;
-  let helloStartX  = width * 0.07;
-  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let helloStartX = width * 0.5 - totalW * 0.5;
+  let helloStartY = height * 0.5 - width * 0.065;
   let offsets      = [];
   for (let i = 0; i < letters.length; i++) {
     let ox = 0;
@@ -983,8 +1021,8 @@ function drawQuoteAnim() {
   let letters      = ['H', 'E', 'L', 'L', 'O'];
   let totalW       = textWidth('HELLO');
   let centerStartX = width * 0.5 - totalW * 0.5;
-  let helloStartX  = width * 0.07;
-  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let helloStartX = width * 0.5 - totalW * 0.5;
+  let helloStartY = height * 0.5 - width * 0.065;
   let offsets      = [];
   for (let i = 0; i < letters.length; i++) {
     let ox = 0;
@@ -1119,9 +1157,9 @@ for (let i = 0; i < 3; i++) {
 const SQ_DURATION = 130;
 
 const SQ_BUBBLES = [
-  { dx: 0.03, dy:  0.02, r: 0.012, delay: 0  }, 
-  { dx: 0.02, dy:  0.09, r: 0.020, delay: 8  }, 
-  { dx: 0.09, dy:  0.06, r: 0.032, delay: 16 }, 
+  { dx: 0.01, dy:  0.04, r: 0.012, delay: 0  }, 
+  { dx: 0.04, dy:  0.11, r: 0.020, delay: 8  }, 
+  { dx: 0.12, dy:  0.08, r: 0.032, delay: 16 }, 
   { dx: 0.10, dy: -0.07, r: 0.045, delay: 24 }, 
 ];
 
@@ -1156,15 +1194,17 @@ function drawSingleQuoteAnim() {
   push();
   textSize(width * 0.13);
   textFont('Noto Sans KR, sans-serif');
-  let letters     = ['H', 'E', 'L', 'L', 'O'];
+  let letters     = ['H', 'E', 'L', 'L', 'O']; // 이 줄 추가
+  let totalW      = textWidth('HELLO');
+  let helloStartX = width * 0.5 - totalW * 0.5;
   let offsets     = [];
   for (let i = 0; i < letters.length; i++) {
     let ox = 0;
     for (let j = 0; j < i; j++) ox += textWidth(letters[j]);
     offsets.push(ox);
   }
-  let oRightX = width * 0.07 + offsets[4] + textWidth('O');
-  let helloCY = height * 0.28 + width * 0.13 * 0.5;
+  let oRightX = helloStartX + offsets[4] + textWidth('O');
+  let helloCY = height * 0.5;
   pop();
 
   noStroke();
@@ -1173,7 +1213,7 @@ function drawSingleQuoteAnim() {
   textStyle(BOLD);
   textSize(width * 0.13);
   textFont('Noto Sans KR, sans-serif');
-  text('HELLO', width * 0.07, height * 0.28);
+  text('HELLO', helloStartX, height * 0.5 - width * 0.065);
 
   if (t >= fadeEnd) {
     for (let i = 0; i < SQ_BUBBLES.length; i++) {
@@ -1198,10 +1238,10 @@ function drawSingleQuoteAnim() {
         let prog     = constrain(ellipseT / 20, 0, 1);
         let ease     = 1 - pow(1 - prog, 3);
 
-        let rW = lerp(r, r * 3.5, ease); 
-        let rH = lerp(r, r * 0.35, ease); 
+        let rW = lerp(r, r * 3.0, ease); 
+        let rH = lerp(r, r * 0.5, ease); 
 
-        let dist = ease * (width * 0.06 + r * 1.5);
+        let dist = ease * (width * 0.03 + r * 1.0);
 
         let angle = SQ_ELLIPSE_ANGLES[i];
 
@@ -1235,8 +1275,8 @@ function drawHyphenAnim() {
   let letters      = ['H', 'E', 'L', 'L', 'O'];
   let totalW       = textWidth('HELLO');
   let centerStartX = width * 0.5 - totalW * 0.5;
-  let helloStartX  = width * 0.07;
-  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let helloStartX = width * 0.5 - totalW * 0.5;
+  let helloStartY = height * 0.5 - width * 0.065;
   let fontSize     = width * 0.13;
   let offsets      = [];
   let charWidths   = [];
@@ -1314,8 +1354,8 @@ function drawAngleAnim() {
   let letters      = ['H', 'E', 'L', 'L', 'O'];
   let totalW       = textWidth('HELLO');
   let centerStartX = width * 0.5 - totalW * 0.5;
-  let helloStartX  = width * 0.07;
-  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let helloStartX = width * 0.5 - totalW * 0.5;
+  let helloStartY = height * 0.5 - width * 0.065;
   let fontSize     = width * 0.13;
   let offsets      = [];
   for (let i = 0; i < letters.length; i++) {
@@ -1323,7 +1363,6 @@ function drawAngleAnim() {
     for (let j = 0; j < i; j++) ox += textWidth(letters[j]);
     offsets.push(ox);
   }
-  
   pop();
 
   let helloY  = height * 0.5 - fontSize * 0.5;
@@ -1423,8 +1462,8 @@ function drawParenAnim() {
   let letters      = ['H', 'E', 'L', 'L', 'O'];
   let totalW       = textWidth('HELLO');
   let centerStartX = width * 0.5 - totalW * 0.5;
-  let helloStartX  = width * 0.07;
-  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let helloStartX = width * 0.5 - totalW * 0.5;
+  let helloStartY = height * 0.5 - width * 0.065;
   let fontSize     = width * 0.13;
   let offsets      = [];
   for (let i = 0; i < letters.length; i++) {
@@ -1654,8 +1693,8 @@ function drawBracketAnim() {
   let letters      = ['H', 'E', 'L', 'L', 'O'];
   let totalW       = textWidth('HELLO');
   let centerStartX = width * 0.5 - totalW * 0.5;
-  let helloStartX  = width * 0.07;
-  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let helloStartX = width * 0.5 - totalW * 0.5;
+  let helloStartY = height * 0.5 - width * 0.065;
   let fontSize     = width * 0.13;
   let offsets      = [];
   for (let i = 0; i < letters.length; i++) {
@@ -1744,8 +1783,8 @@ function drawUnderscoreAnim() {
   let letters      = ['H', 'E', 'L', 'L', 'O'];
   let totalW       = textWidth('HELLO');
   let centerStartX = width * 0.5 - totalW * 0.5;
-  let helloStartX  = width * 0.07;
-  let helloStartY  = height * 0.28 + width * 0.13 * 0.5;
+  let helloStartX = width * 0.5 - totalW * 0.5;
+  let helloStartY = height * 0.5 - width * 0.065;
   let fontSize     = width * 0.13;
   let offsets      = [];
   for (let i = 0; i < letters.length; i++) {
@@ -2004,13 +2043,20 @@ function drawGuideText() {
 }
 
 function drawHello(str) {
+  push();
+  textSize(width * 0.13);
+  textFont('Noto Sans KR, sans-serif');
+  let totalW = textWidth(str);
+  pop();
+  
   textAlign(LEFT, TOP);
   textStyle(BOLD);
   textSize(width * 0.13);
   fill(45);
   noStroke();
   textFont('Noto Sans KR, sans-serif');
-  text(str, width * 0.07, height * 0.28);
+  let startX = width * 0.5 - totalW * 0.5;
+  text(str, startX, height * 0.5 - width * 0.065);
 }
 
 function resetToIdle() {
@@ -2082,6 +2128,112 @@ function keyPressed() {
   }
 }
 
+// ─────────────────────────────────────────────────────
+//  목록
+// ─────────────────────────────────────────────────────
+const MENU_ITEMS = [
+  '. 마침표', '? 물음표', '! 느낌표', ', 쉼표',
+  '/ 빗금', '() 소괄호', '{} 중괄호', '[] 대괄호',
+  '" 큰따옴표', "' 작은따옴표", '– 붙임표',
+  ': 쌍점', '~ 물결표', '_ 밑줄', '< > 홀화살괄호'
+];
+let menuScrollY  = 0;
+let menuScrollTarget = 0;
+
+function drawMenu() {
+  let panelW = width * 0.28;
+  let panelH = height;
+
+  let panelX = -panelW + menuSlide * panelW;
+
+  noStroke();
+  fill(255);
+  rect(panelX, 0, panelW, panelH);
+
+  stroke(45);
+  strokeWeight(1.5);
+  line(panelX + panelW, 0, panelX + panelW, panelH);
+
+  let itemH    = panelH * 0.075;
+  let fontSize = width * 0.022;
+  let visibleH = panelH - itemH;
+
+  menuScrollY = lerp(menuScrollY, menuScrollTarget, 0.15);
+
+  drawingContext.save();
+  drawingContext.beginPath();
+  drawingContext.rect(panelX, 0, panelW, visibleH);
+  drawingContext.clip();
+
+  for (let i = 0; i < MENU_ITEMS.length; i++) {
+    let itemY = i * itemH - menuScrollY;
+    if (itemY + itemH < 0 || itemY > visibleH) continue;
+
+    stroke(200);
+    strokeWeight(1);
+    line(panelX, itemY + itemH, panelX + panelW, itemY + itemH);
+
+    noStroke();
+    fill(45);
+    textAlign(LEFT, CENTER);
+    textStyle(NORMAL);
+    textSize(fontSize);
+    textFont('Noto Sans KR, sans-serif');
+    text(MENU_ITEMS[i], panelX + panelW * 0.08, itemY + itemH * 0.5);
+  }
+
+  drawingContext.restore();
+
+  noStroke();
+  fill(255);
+  rect(panelX, panelH - itemH, panelW, itemH);
+  stroke(200);
+  strokeWeight(1);
+  line(panelX, panelH - itemH, panelX + panelW, panelH - itemH);
+
+  drawMenuIcon(panelX + panelW * 0.65, panelH - itemH * 0.5, fontSize);
+  noStroke();
+  fill(45);
+  textAlign(RIGHT, CENTER);
+  textSize(fontSize);
+  textFont('Noto Sans KR, sans-serif');
+  text('목록', panelX + panelW * 0.92, panelH - itemH * 0.5);
+}
+
+function drawMenuIcon(x, y, size) {
+  noStroke();
+  fill(45);
+  let lineW = size * 1.8;
+  let lineH = size * 0.18;
+  let gap   = size * 0.5;
+  rect(x - lineW * 0.5, y - gap - lineH * 0.5,   lineW, lineH);
+  rect(x - lineW * 0.5, y - lineH * 0.5,          lineW, lineH);
+  rect(x - lineW * 0.5, y + gap - lineH * 0.5,    lineW, lineH);
+}
+
+function drawMenuButton() {
+  let bx      = width * 0.02;
+  let by      = height * 0.92;
+  let fontSize = width * 0.025;
+
+  drawMenuIcon(bx + fontSize * 0.5, by, fontSize);
+  noStroke();
+  fill(45);
+  textAlign(LEFT, CENTER);
+  textSize(fontSize);
+  textFont('Noto Sans KR, sans-serif');
+  text('목록', bx + fontSize * 2.2, by);
+}
+
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+}
+
+function mouseWheel(event) {
+  if (!menuOpen) return;
+  let panelW   = width * 0.28;
+  let itemH    = height * 0.075;
+  let maxScroll = MENU_ITEMS.length * itemH - (height - itemH);
+  menuScrollTarget = constrain(menuScrollTarget + event.delta, 0, maxScroll);
+  return false;
 }
