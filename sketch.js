@@ -65,7 +65,7 @@ function setup() {
       let visibleH = height - itemH;
 
       if (e.clientX > panelX && e.clientX < panelX + panelW) {
-        let clickedY = e.clientY + menuScrollY;
+        let clickedY = e.clientY + menuScrollTarget;
         let itemIndex = Math.floor(clickedY / itemH);
 
         if (itemIndex >= 0 && itemIndex < MENU_ITEMS.length) {
