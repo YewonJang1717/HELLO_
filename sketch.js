@@ -62,7 +62,6 @@ function setup() {
       let panelW  = width * 0.28;
       let panelX  = -panelW + menuSlide * panelW;
       let itemH   = height * 0.075;
-      let visibleH = height - itemH;
 
       if (e.clientX > panelX && e.clientX < panelX + panelW) {
         let clickedY = e.clientY + menuScrollTarget;
@@ -78,10 +77,14 @@ function setup() {
           else if (punct === '<>') inputChar = '<';
           else inputChar = punct;
 
-          state = 'animating';
-          t = 0;
           menuOpen   = false;
           menuTarget = 0;
+          let pendingChar = inputChar;
+          setTimeout(function() {
+            inputChar = pendingChar;
+            state = 'animating';
+            t = 0;
+          }, 450);
         }
       }
     }
@@ -114,7 +117,7 @@ function draw() {
   }
 
    if (state !== 'animating') {
-    menuSlide = lerp(menuSlide, menuTarget, 0.12);
+    menuSlide = lerp(menuSlide, menuTarget, 0.20);
     drawMenuButton();
     if (menuSlide > 0.01) drawMenu();
   } else {
@@ -490,7 +493,7 @@ function initExclamationAnim() {
   for (let i = 0; i < letters.length; i++) {
     let startX  = helloStartX + offsets[i];
     let startY  = helloStartY;
-    let targetX = width * 0.5 - totalW * 0.5 + offsets[i];
+    let targetX = width * 0.5 - totalW * 0.5 + textWidth(letters.slice(0, i).join(''));
     let targetY = height * 0.5;
 
     exParticles.push({
@@ -573,17 +576,29 @@ function drawExclamationAnim() {
         p.currentAngle += p.rotate;
       }
 
-      noStroke();
-      fill(p.color[0], p.color[1], p.color[2], p.alpha);
-      textAlign(CENTER, CENTER);
-      textStyle(BOLD);
-      textSize(p.size);
-      textFont('Noto Sans KR, sans-serif');
-      push();
-      translate(p.x, p.y);
-      rotate(p.currentAngle);
-      text(p.char, 0, 0);
-      pop();
+      // 이동 중(t <= pauseEnd)에는 HELLO 전체를 한 번에 그림
+      if (p.char === 'H' && t <= pauseEnd) {
+        noStroke();
+        fill(44, 44, 44, p.alpha);
+        textAlign(LEFT, TOP);
+        textStyle(BOLD);
+        textSize(p.size);
+        textFont('Noto Sans KR, sans-serif');
+        text('HELLO', p.x, p.y);
+      } else if (t > pauseEnd) {
+        // 터진 후에는 개별 글자로 그림
+        noStroke();
+        fill(44, 44, 44, p.alpha);
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        textSize(p.size);
+        textFont('Noto Sans KR, sans-serif');
+        push();
+        translate(p.x, p.y);
+        rotate(p.currentAngle);
+        text(p.char, 0, 0);
+        pop();
+      }
     }
   }
 
@@ -1653,7 +1668,7 @@ function drawBraceAnim() {
 
       let prog = constrain(localT / 15, 0, 1);
       let ease = 1 - pow(1 - prog, 3);
-      let cy   = targetYs[i] + fontSize * 0.25; 
+      let cy   = targetYs[i] + fontSize * 0.50; 
       let w    = ease * (shapeEndX - shapeStartX);
 
       noStroke();
@@ -1708,7 +1723,7 @@ function drawBracketAnim() {
   if (t < BRACKET_DURATION) t++;
 
   let moveEnd   = 25;
-  let pauseEnd  = 31;
+  let pauseEnd  = 14;
   let mergeEnd  = 80; 
    let endFrame = mergeEnd + 30;
 
@@ -1764,28 +1779,41 @@ function drawBracketAnim() {
     let leftX  = lerp(-ellipseW, cx, ease);
     let rightX = lerp(width + ellipseW, cx, ease);
 
+    // 합쳐진 후 퍼져나가며 사라짐
+    let expandProg  = constrain((t - mergeEnd) / 20, 0, 1);
+    let expandEase  = expandProg * expandProg;
+    let expandW     = ellipseW * (1 + expandEase * 0.5);
+    let expandH     = ellipseH * (1 + expandEase * 0.5);
+    let alpha       = t > mergeEnd ? map(t, mergeEnd, mergeEnd + 20, 255, 0) : 255;
+
     noStroke();
-    fill(0, 0, 205); 
+    fill(0, 0, 205, alpha);
 
-    push();
-    translate(leftX, cy);
-    drawingContext.save();
-    drawingContext.beginPath();
-    drawingContext.rect(-ellipseW, -ellipseH, ellipseW, ellipseH * 2);
-    drawingContext.clip();
-    ellipse(0, 0, ellipseW * 2, ellipseH * 2);
-    drawingContext.restore();
-    pop();
+    if (t < mergeEnd) {
+      // 합쳐지는 단계
+      push();
+      translate(leftX, cy);
+      drawingContext.save();
+      drawingContext.beginPath();
+      drawingContext.rect(-ellipseW, -ellipseH, ellipseW, ellipseH * 2);
+      drawingContext.clip();
+      ellipse(0, 0, ellipseW * 2, ellipseH * 2);
+      drawingContext.restore();
+      pop();
 
-    push();
-    translate(rightX, cy);
-    drawingContext.save();
-    drawingContext.beginPath();
-    drawingContext.rect(0, -ellipseH, ellipseW, ellipseH * 2);
-    drawingContext.clip();
-    ellipse(0, 0, ellipseW * 2, ellipseH * 2);
-    drawingContext.restore();
-    pop();
+      push();
+      translate(rightX, cy);
+      drawingContext.save();
+      drawingContext.beginPath();
+      drawingContext.rect(0, -ellipseH, ellipseW, ellipseH * 2);
+      drawingContext.clip();
+      ellipse(0, 0, ellipseW * 2, ellipseH * 2);
+      drawingContext.restore();
+      pop();
+
+    } else {
+      ellipse(cx, cy, expandW * 2, expandH * 2);
+    }
   }
 
   if (t >= endFrame) resetToIdle();
@@ -2145,11 +2173,13 @@ function keyPressed() {
     state = 'input';
   } else if (keyCode === ENTER) {
     if (state === 'input') {
-      state = 'animating';
-      t = 0;
+      menuOpen   = false;
+      menuTarget = 0;
+      setTimeout(function() {
+        state = 'animating';
+        t = 0;
+      }, 450); 
     }
-  } else if (keyCode === BACKSPACE) {
-    resetToIdle();
   }
 }
 
