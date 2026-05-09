@@ -1723,7 +1723,7 @@ function drawBracketAnim() {
   if (t < BRACKET_DURATION) t++;
 
   let moveEnd   = 25;
-  let pauseEnd  = 14;
+  let pauseEnd  = 31;
   let mergeEnd  = 80; 
    let endFrame = mergeEnd + 30;
 
