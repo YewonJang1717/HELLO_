@@ -58,7 +58,6 @@ function setup() {
       }
     }
 
-    // 목록 항목 클릭
     if (menuOpen && menuSlide > 0.9) {
       let panelW  = width * 0.28;
       let panelX  = -panelW + menuSlide * panelW;
@@ -70,11 +69,9 @@ function setup() {
         let itemIndex = Math.floor(clickedY / itemH);
 
         if (itemIndex >= 0 && itemIndex < MENU_ITEMS.length) {
-          // 각 항목에 해당하는 문장부호
           let punctuations = ['.','?','!',',','/','()','{}'  ,'[]','"',"'",'-',':','~','_','<>'];
           let punct = punctuations[itemIndex];
 
-          // 해당 문장부호로 애니메이션 시작
           if (punct === '()') inputChar = '(';
           else if (punct === '{}') inputChar = '{';
           else if (punct === '[]') inputChar = '[';
@@ -89,21 +86,6 @@ function setup() {
       }
     }
   });
-  let touchStartY = 0;
-  document.addEventListener('touchstart', function(e) {
-    touchStartY = e.touches[0].clientY;
-  });
-
-  document.addEventListener('touchmove', function(e) {
-    if (!menuOpen) return;
-    let touchY   = e.touches[0].clientY;
-    let delta    = touchStartY - touchY;
-    touchStartY  = touchY;
-    let itemH    = height * 0.075;
-    let maxScroll = MENU_ITEMS.length * itemH - (height - itemH);
-    menuScrollTarget = constrain(menuScrollTarget + delta, 0, maxScroll);
-    e.preventDefault();
-  }, { passive: false });
 }
 
 function draw() {
