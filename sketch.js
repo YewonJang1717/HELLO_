@@ -48,16 +48,6 @@ function setup() {
       return;
     }
 
-    // 패널 안 맨 아래 버튼 클릭
-    if (menuOpen) {
-      let panelX = -panelW + menuSlide * panelW;
-      if (e.clientX > panelX && e.clientX < panelX + panelW &&
-          e.clientY > height - itemH) {
-        menuOpen   = false;
-        menuTarget = 0;
-      }
-    }
-
     if (menuOpen && menuSlide > 0.9) {
       let panelW  = width * 0.28;
       let panelX  = -panelW + menuSlide * panelW;
@@ -86,6 +76,14 @@ function setup() {
             t = 0;
           }, 450);
         }
+      }
+    }
+    if (menuOpen) {
+      let panelX = -panelW + menuSlide * panelW;
+      if (e.clientX > panelX && e.clientX < panelX + panelW &&
+          e.clientY > height - itemH) {
+        menuOpen   = false;
+        menuTarget = 0;
       }
     }
   });
@@ -806,7 +804,7 @@ function drawSlashAnim() {
     let p1       = nodes[i];
     let p2       = nodes[i + 1];
     let localT   = t - startTime;
-    let progress = constrain(localT / 18, 0, 1);
+    let progress = constrain(localT / 8, 0, 1);
     let ease     = 1 - (1 - progress) * (1 - progress);
 
     let ex = lerp(p1.x, p2.x, ease);
