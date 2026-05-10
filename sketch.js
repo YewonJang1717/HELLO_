@@ -32,6 +32,7 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
 
   document.addEventListener('click', function(e) {
+    console.log('clicked', e.clientX, e.clientY);
     if (state === 'animating') return;
     
     let panelW   = width * 0.28;
@@ -48,17 +49,21 @@ function setup() {
       return;
     }
 
-    if (menuOpen && menuSlide > 0.9) {
+    if (menuOpen) {
       let panelW  = width * 0.28;
       let panelX  = -panelW + menuSlide * panelW;
       let itemH   = height * 0.075;
+      console.log('panelX:', panelX, 'panelX+panelW:', panelX+panelW, 'clientX:', e.clientX, 'menuSlide:', menuSlide);
 
       if (e.clientX > panelX && e.clientX < panelX + panelW) {
+        let visibleH = height - itemH; 
+        if (e.clientY > visibleH) return; 
+        
         let clickedY = e.clientY + menuScrollTarget;
         let itemIndex = Math.floor(clickedY / itemH);
 
         if (itemIndex >= 0 && itemIndex < MENU_ITEMS.length) {
-          let punctuations = ['.','?','!',',','/','()','{}','[]','"',"'",'-',':','~','_','<>'];
+          let punctuations = ['.','?','!',',','/','()','{}','[]','"',"'",'-',':','~','_','<>',''];
           let punct = punctuations[itemIndex];
 
           if (punct === '()') inputChar = '(';
@@ -2187,8 +2192,9 @@ function keyPressed() {
 const MENU_ITEMS = [
   '. 마침표', '? 물음표', '! 느낌표', ', 쉼표',
   '/ 빗금', '() 소괄호', '{} 중괄호', '[] 대괄호',
-  '" 큰따옴표', "' 작은따옴표", '– 붙임표',
-  ': 쌍점', '~ 물결표', '_ 밑줄', '< > 홀화살괄호'
+  '" 큰따옴표', "' 작은따옴표", '- 붙임표',
+  ': 쌍점', '~ 물결표', '_ 밑줄', '< > 홀화살괄호',
+  ''
 ];
 let menuScrollY  = 0;
 let menuScrollTarget = 0;
