@@ -41,8 +41,17 @@ function setup() {
     let by       = height * 0.92;
     let fs       = width * 0.018;
 
+    if (menuOpen) {
+      let panelX = -panelW + menuSlide * panelW;
+      if (e.clientX > panelX && e.clientX < panelX + panelW &&
+          e.clientY > height - itemH) {
+        menuOpen   = false;
+        menuTarget = 0;
+      }
+    }
+
     // 좌측 하단 버튼 클릭
-    if (e.clientX > bx && e.clientX < bx + fs * 8 &&
+     if (e.clientX > bx && e.clientX < bx + fs * 8 &&
         e.clientY > by - fs * 2 && e.clientY < by + fs * 2) {
       menuOpen   = !menuOpen;
       menuTarget = menuOpen ? 1 : 0;
@@ -65,6 +74,7 @@ function setup() {
         if (itemIndex >= 0 && itemIndex < MENU_ITEMS.length) {
           let punctuations = ['.','?','!',',','/','()','{}','[]','"',"'",'-',':','~','_','<>',''];
           let punct = punctuations[itemIndex];
+          if (punct === '' || punct === undefined) return;
 
           if (punct === '()') inputChar = '(';
           else if (punct === '{}') inputChar = '{';
@@ -81,14 +91,6 @@ function setup() {
             t = 0;
           }, 450);
         }
-      }
-    }
-    if (menuOpen) {
-      let panelX = -panelW + menuSlide * panelW;
-      if (e.clientX > panelX && e.clientX < panelX + panelW &&
-          e.clientY > height - itemH) {
-        menuOpen   = false;
-        menuTarget = 0;
       }
     }
   });
